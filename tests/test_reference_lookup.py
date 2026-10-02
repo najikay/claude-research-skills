@@ -87,7 +87,7 @@ def test_verify_picks_the_agreeing_record_and_explains_mismatches(fake):
     v = rl.verify_reference({"doi": "https://doi.org/10.1109/CVPR.2016.90", "title": "Deep Residual Learning for Image Recognition", "authors": ["Kaiming He"], "year": 2016})
     assert v["status"] == "verified" and v["by"] == "doi" and v["matched_doi"] == "10.1109/cvpr.2016.90"
     v = rl.verify_reference({"doi": "10.9999/dead", "title": "Deep Residual Learning for Image Recognition", "authors": ["Kaiming He"], "year": 2016})
-    assert v["status"] == "verified" and v["by"] == "title"
+    assert v["status"] == "partial" and v["by"] == "title" and "unknown to OpenAlex" in v["notes"][0]  # a dead DOI is a note, not proof
     v = rl.verify_reference({"doi": "10.9999/down"})
     assert v["status"] == "unchecked" and "HTTP 503" in v["problems"][0]
     v = rl.verify_reference({"arxiv": "arXiv:2007.11898v2", "title": "ORB-SLAM3: An Accurate Open-Source Library for Visual, Visual–Inertial, and Multimap SLAM", "authors": ["Carlos Campos"], "year": 2021})
@@ -140,7 +140,7 @@ def test_jsonrpc_surface(fake):
     r = rl.handle({"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "verify_reference", "arguments": {"title": "Attention Is All You Need", "authors": ["Ashish Vaswani"], "year": 2017}}})
     assert r["result"]["isError"] is False and json.loads(r["result"]["content"][0]["text"])["status"] == "verified"
     bad = rl.handle({"jsonrpc": "2.0", "id": 4, "method": "tools/call", "params": {"name": "nope", "arguments": {}}})
-    assert bad["result"]["isError"] is True and "unknown tool" in bad["result"]["content"][0]["text"]
+    assert bad["error"]["code"] == -32602 and "unknown tool" in bad["error"]["message"]
     assert rl.handle({"jsonrpc": "2.0", "id": 5, "method": "resources/list"})["error"]["code"] == -32601
     assert rl.handle({"jsonrpc": "2.0", "id": 6, "method": "ping"})["result"] == {}
 
@@ -151,3 +151,69 @@ def test_helpers():
     assert rl.author_list("A B and C D") == ["A B", "C D"] and rl.author_list(["x", " "]) == ["x"]
     assert rl.title_similarity("Multi-Map SLAM", "Multimap SLAM") >= 0.9 and rl.title_similarity("", "x") == 0.0
     assert rl.parse_arxiv("not xml") == [] and rl.parse_arxiv(ATOM)[0]["arxiv"] == "2007.11898v2"
+
+
+def test_review_findings_wrong_doi_unicode_robustness(fake, monkeypatch):
+    # a DOI that resolves to another paper is a mismatch, even when the title would match by search
+    monkeypatch.setattr(rl, "fetch", lambda url, params=None: (200, json.dumps(work("W9", "Soil bacteria of the Negev", 2010, ["A Soil"]))) if "doi.org" in url else (200, json.dumps({"results": [work("W2", "Attention Is All You Need", 2017, ["Ashish Vaswani"])]})))
+    v = rl.verify_reference({"doi": "10.9999/soil", "title": "Attention Is All You Need", "authors": ["Ashish Vaswani"], "year": 2017})
+    assert v["status"] == "mismatch" and "points to another paper" in v["problems"][0] and "Soil" in v["problems"][0]
+    # accents, LaTeX accents and non-Latin titles
+    monkeypatch.setattr(rl, "fetch", lambda url, params=None: (200, json.dumps({"results": [work("W5", "Über Müller: eine Studie", 2019, ["Jürgen Müller"])]})))
+    v = rl.verify_reference({"title": r"{\"U}ber M{\"u}ller: eine Studie", "authors": [r"M{\"u}ller, J{\"u}rgen"], "year": 2019})
+    assert v["status"] == "verified", v
+    assert rl.title_similarity("Uber Muller", "Über Müller") == 1.0
+    monkeypatch.setattr(rl, "fetch", lambda url, params=None: (200, json.dumps({"results": [work("W6", "深層学習による自己位置推定", 2020, ["田中 太郎"])]})))
+    assert rl.verify_reference({"title": "深層学習による自己位置推定", "authors": ["田中 太郎"], "year": 2020})["status"] == "verified"
+    # partial: year off with title and author agreeing; title-only match
+    monkeypatch.setattr(rl, "fetch", lambda url, params=None: (200, json.dumps({"results": [work("W2", "Attention Is All You Need", 2017, ["Ashish Vaswani"])]})))
+    assert rl.verify_reference({"title": "Attention Is All You Need", "authors": ["Ashish Vaswani"], "year": 2009})["status"] == "partial"
+    assert rl.verify_reference({"title": "Attention Is All You Need"})["status"] == "partial"
+    # suffixes and 'van der' names
+    assert rl.surname("King Jr., Martin Luther") == "king" and rl.surname("Martin Luther King Jr.") == "king" and rl.surname("Ludwig van der Waals") == "waals"
+    # DOIs with spaces or reserved characters are encoded, never raise
+    assert rl.doi_path("https://doi.org/10.1000/a b#c?d") == "10.1000/ab%23c%3Fd"
+    monkeypatch.setattr(rl, "fetch", lambda url, params=None: (0, "boom"))
+    assert rl.verify_bibtex("@article{k, title={T}, author={A B}, year={2020}, doi={10.1000/a b}}")["results"][0]["status"] == "unchecked"
+    # RPC robustness: non-objects, bad params, unknown tool → errors, never exceptions
+    assert rl.handle([1, 2])["error"]["code"] == -32600
+    assert rl.handle({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": [1]})["error"]["code"] == -32602
+    assert rl.handle({"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "nope", "arguments": {}}})["error"]["code"] == -32602
+    assert rl.handle({"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "search_works", "arguments": [1]}})["error"]["code"] == -32602
+    assert rl.handle({"jsonrpc": "2.0", "id": 4, "method": "initialize", "params": {"protocolVersion": "1999-01-01"}})["result"]["protocolVersion"] == rl.PROTOCOL_VERSION
+    assert rl.handle(5) ["error"]["code"] == -32600
+
+
+def test_bibtex_edge_cases(fake):
+    bib = r"""
+@comment{ @article{ghost, title={Should Not Appear}, author={No One}, year={2000}} }
+@preamble{ "\newcommand{\x}{y}" }
+@string{nips = "Advances in Neural Information Processing Systems"}
+@inproceedings{vaswani2017attention,
+  title = {Attention Is {All} You {{Need}}},
+  author = {Vaswani, Ashish and Shazeer, Noam},
+  booktitle = nips,
+  year = 2017
+}
+@article{he2016deep, title="Deep {Residual} Learning for Image Recognition", author="He, Kaiming", journal="CVPR" # " 2016", year=2016}
+@article{he2016deep, title={Duplicate Key}, author={X}, year={2016}}
+@misc{nested, title={A {B {C}} and D}, author={Q}, year={2021}}
+"""
+    refs = rl.parse_bibtex(bib)
+    keys = [r["citekey"] for r in refs]
+    assert keys == ["vaswani2017attention", "he2016deep", "he2016deep", "nested"]  # the @comment ghost is gone
+    assert refs[0]["title"] == "Attention Is All You Need" and refs[0]["venue"] == "Advances in Neural Information Processing Systems"
+    assert refs[1]["venue"] == "CVPR 2016" and refs[1]["title"] == "Deep Residual Learning for Image Recognition"
+    assert refs[2].get("duplicate_of") == "he2016deep" and refs[3]["title"] == "A B C and D"
+    out = rl.verify_bibtex(bib)
+    assert any("duplicate citekey" in p for p in out["results"][2]["problems"])
+    assert rl.verify_bibtex(bib, limit=2)["skipped"].startswith("2 entries")
+
+
+def test_arxiv_doi_and_zero_arguments(fake):
+    atom = ATOM.replace("</entry>", '<arxiv:doi xmlns:arxiv="http://arxiv.org/schemas/atom">10.1109/TRO.2021.3075644</arxiv:doi></entry>')
+    recs = rl.parse_arxiv(atom)
+    assert recs[0]["doi"] == "https://doi.org/10.1109/TRO.2021.3075644"
+    calls = fake
+    rl.call("citation_neighbours", {"ident": "10.1109/CVPR.2016.90", "refs": 0, "cites": 0})
+    assert not any("cites:" in (p.get("filter") or "") for _, p in calls)  # cites=0 means no cited-by call
