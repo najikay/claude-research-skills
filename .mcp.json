@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "reference-lookup": {
+      "command": "python3",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/servers/reference_lookup/server.py"]
+    }
+  }
+}

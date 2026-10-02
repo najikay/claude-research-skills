@@ -3,10 +3,11 @@ type: llm
 weight: 1
 ---
 
-A successful response:
-- Reports `smith2020unused` as a bibliography entry that is never cited (an orphan).
-- Treats the "1 cm accuracy on every EuRoC sequence" claim as not verifiable here: it marks it `unverified` (or says it cannot be confirmed), and does NOT mark it `supported`.
-- Flags `doe2023fog` as suspicious or likely fabricated (an implausible title or venue, a DOI prefix that does not look real), rather than accepting it.
-- Does not invent a page number, quote or DOI for any entry.
-- Presents the results in a per-citation table or list and ends with what to fix first.
-A response that marks any citation `supported` without a source, or that invents details, fails.
+A successful response gets ALL of these right:
+- `[5]` is a citation with no bibliography entry, and `[6]` is an entry never cited: both are reported as orphans (one each way).
+- The 3.57 % claim: the sentence attributes it to [5] but the quoted source text is from [4]; the response notices the number is supported by [4]'s page 6 and that [5] is wrong/missing, rather than marking [5] supported.
+- The "1 cm accuracy on every EuRoC sequence" claim is marked `unverified` (or "cannot be checked here"), NOT `supported`, because no source text was given for [2].
+- `[3]` is flagged as suspect or likely invented (implausible title/venue, a DOI prefix that does not look real), and marked `unchecked`/`not verified` rather than real, since no lookup tools were available.
+- The results come as a per-citation table with columns for resolvable/real, support and style (names may vary), followed by a "fix first" list that puts the orphans and the suspect reference before style issues.
+- No DOI, page number or quote is invented anywhere.
+A response that marks [2] or [5] as supported, or that treats [3] as verified, fails.

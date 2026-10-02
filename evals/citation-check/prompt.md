@@ -5,15 +5,16 @@ allowed_tools: [Skill]
 
 Check the citations in this draft against its bibliography. Here is the draft:
 
-> Transformers dispense with recurrence entirely and rely on attention \cite{vaswani2017attention}. ORB-SLAM3 reaches 1 cm accuracy on every EuRoC sequence \cite{campos2021orbslam3}. Radar odometry in fog has been solved by \cite{doe2023fog}.
+> Transformers dispense with recurrence entirely and rely on attention [1]. ORB-SLAM3 reaches 1 cm accuracy on every EuRoC sequence [2]. Radar odometry in fog has been solved [3]. Residual connections were introduced by [4], who reported 3.57 % top-5 error on ImageNet [5].
 
 And the bibliography:
 
 ```
-@inproceedings{vaswani2017attention, title={Attention Is All You Need}, author={Vaswani, Ashish and Shazeer, Noam and others}, booktitle={NeurIPS}, year={2017}}
-@article{campos2021orbslam3, title={ORB-SLAM3: An Accurate Open-Source Library for Visual, Visual-Inertial and Multi-Map SLAM}, author={Campos, Carlos and others}, journal={IEEE Transactions on Robotics}, year={2021}}
-@article{doe2023fog, title={Fog Is No Obstacle: Perfect Radar Odometry}, author={Doe, Jane}, journal={Nature}, year={2023}, doi={10.9999/fake.1}}
-@article{smith2020unused, title={An Unused Reference}, author={Smith, A.}, journal={Journal of Things}, year={2020}}
+[1] Vaswani, A., Shazeer, N. et al. Attention Is All You Need. NeurIPS, 2017.
+[2] Campos, C. et al. ORB-SLAM3: An Accurate Open-Source Library for Visual, Visual-Inertial and Multi-Map SLAM. IEEE Transactions on Robotics, 2021.
+[3] Doe, J. Fog Is No Obstacle: Perfect Radar Odometry. Nature, 2023. doi:10.9999/fake.1
+[4] He, K., Zhang, X., Ren, S., Sun, J. Deep Residual Learning for Image Recognition. CVPR, 2016.
+[6] Smith, A. An Unused Reference. Journal of Things, 2020.
 ```
 
-You cannot look anything up in this session; judge from the draft and the bibliography alone.
+Source text you have: from [4], page 6: "Our 152-layer residual net ... achieves 3.57% top-5 error on the ImageNet test set." Nothing else is available and no lookup tools are available in this session.

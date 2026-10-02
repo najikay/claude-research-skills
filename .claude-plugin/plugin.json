@@ -1,7 +1,7 @@
 {
   "name": "research-desk",
-  "version": "0.1.0",
-  "description": "Four skills for research work: check every citation in a draft, turn a paper into a structured literature note, decide between options with a weighted matrix, and get a judged council of independent model answers.",
+  "version": "0.2.0",
+  "description": "Research skills with a reference checker: verify every citation against OpenAlex and arXiv, turn a paper into a literature note with page references, decide between options with a weighted matrix, and run a council of independent answers with a judge.",
   "author": {
     "name": "Naji Kayal",
     "url": "https://github.com/najikay"
