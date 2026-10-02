@@ -33,3 +33,7 @@ claude plugin eval . --runs 1
 ## Author
 
 Naji Kayal, University of Haifa (robotics, SLAM, computer vision). Issues and suggestions are welcome here.
+
+## License
+
+Apache-2.0. See `LICENSE`.

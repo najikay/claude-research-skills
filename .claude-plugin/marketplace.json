@@ -1,15 +1,29 @@
 {
   "name": "claude-research-skills",
-  "owner": { "name": "Naji Kayal", "url": "https://github.com/najikay" },
-  "metadata": { "description": "Research skills for Claude: citation check, literature notes, decision matrix, LLM council." },
+  "owner": {
+    "name": "Naji Kayal",
+    "url": "https://github.com/najikay"
+  },
+  "metadata": {
+    "description": "Research skills for Claude: citation check, literature notes, decision matrix, LLM council."
+  },
   "plugins": [
     {
       "name": "research-skills",
       "source": "./",
       "description": "Four skills for research work: check every citation in a draft, turn a paper into a structured literature note, decide between options with a weighted matrix, and get a judged council of independent answers.",
       "version": "0.1.0",
-      "author": { "name": "Naji Kayal" },
-      "keywords": ["research", "citations", "papers", "literature-review", "decisions"]
+      "author": {
+        "name": "Naji Kayal"
+      },
+      "keywords": [
+        "research",
+        "citations",
+        "papers",
+        "literature-review",
+        "decisions"
+      ],
+      "license": "Apache-2.0"
     }
   ]
 }
