@@ -1,4 +1,4 @@
-# research-skills
+# Research Desk
 
 Four skills for research work, as a Claude plugin. Each is plain instructions: nothing runs on your machine, and nothing leaves it beyond what you ask Claude to look up.
 
@@ -19,7 +19,7 @@ From the Claude directory (Customize → plugins), or in Claude Code:
 
 ```
 /plugin marketplace add najikay/claude-research-skills
-/plugin install research-skills@claude-research-skills
+/plugin install research-desk@claude-research-skills
 ```
 
 ## Evals

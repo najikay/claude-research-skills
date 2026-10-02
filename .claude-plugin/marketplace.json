@@ -9,7 +9,7 @@
   },
   "plugins": [
     {
-      "name": "research-skills",
+      "name": "research-desk",
       "source": "./",
       "description": "Four skills for research work: check every citation in a draft, turn a paper into a structured literature note, decide between options with a weighted matrix, and get a judged council of independent answers.",
       "version": "0.1.0",
