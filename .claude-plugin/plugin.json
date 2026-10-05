@@ -1,7 +1,7 @@
 {
   "name": "research-desk",
-  "version": "0.2.1",
-  "description": "Research skills with a reference checker: verify every citation against OpenAlex and arXiv, turn a paper into a literature note with page references, decide between options with a weighted matrix, and run a council of independent answers with a judge.",
+  "version": "0.3.0",
+  "description": "Research work you can stand behind: check that references are real, take faithful notes on a paper, compare papers, draft related work from your own sources, review a draft like a referee, decide between options with a weighted matrix, and get a judged second opinion. Says plainly what it could not verify.",
   "author": {
     "name": "Naji Kayal",
     "url": "https://github.com/najikay"
@@ -11,8 +11,12 @@
   "keywords": [
     "research",
     "citations",
+    "references",
     "papers",
     "literature-review",
+    "related-work",
+    "peer-review",
+    "thesis",
     "decisions"
   ],
   "license": "Apache-2.0",

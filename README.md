@@ -2,14 +2,33 @@
 
 ![Research Desk](assets/banner.png)
 
-Four skills and one small tool server for research work, as a Claude plugin: the skills tell Claude how to check citations, write literature notes, structure decisions and run a council of independent answers; the `reference-lookup` server lets `citation-check` find out whether a reference is real instead of guessing.
+[![tests](https://github.com/najikay/claude-research-skills/actions/workflows/tests.yml/badge.svg)](https://github.com/najikay/claude-research-skills/actions/workflows/tests.yml)
 
-| skill | ask for it when | what you get |
+**Research work you can stand behind.** Seven skills for the things a student or researcher does every week: check that references are real, take faithful notes on a paper, compare papers, draft related work from your own sources, get your draft reviewed before a referee does, decide between options, and get a second opinion. Plus a small reference checker that looks papers up in OpenAlex and arXiv.
+
+The skills share one habit: **they say what they could not check.** A reference is `verified` only when it was looked up; a claim is `supported` only when the source text was read; a missing citation becomes `[citation needed]`, never an invented one.
+
+## The skills
+
+| Skill | Say something like | What you get |
 |---|---|---|
-| **citation-check** | before sharing a draft | a table per citation: resolvable, **real** (verified / mismatch / not found, via the lookup server), supported by the source or `unverified`, style; orphans both ways; what to fix first; never an invented DOI, page or quote |
-| **research-litnote** | you read a paper you will cite | a structured note (takeaway, problem, method, evidence with page refs, limits, relevance, quotes) with frontmatter and a citekey, left as a draft for you to accept |
-| **decision-matrix** | you are choosing between alternatives | options × weighted criteria with evidence, a sensitivity check, a recommendation and a reversible first step; the decision stays yours |
-| **llm-council** | a judgement call deserves more than one answer | several independent answers, then an anonymised judge: agreements, disagreements, claims to verify, a final answer with confidence |
+| **citation-check** | "Are these references real?" "Check my citations before I submit." | A table per citation: does it resolve, is the reference real (`verified`, `partial`, `mismatch`, `not_found`, `unchecked`), does the source support the sentence, style. Orphans both ways. What to fix first. |
+| **research-litnote** | "Summarise this paper." "Make notes on this PDF." | A structured note: one-line takeaway, problem, method, evidence with page references, limits, quotes. Marked with what it was based on (full text or abstract only). |
+| **paper-compare** | "Compare these three papers." "Which should be my baseline?" | A side-by-side table with the numbers copied from each paper and where they stand, what each adds, which to cite for what, and a plain "not directly comparable" when benchmarks differ. |
+| **related-work** | "Draft my related work from these notes." | A themed section where every sentence carries one of *your* sources, ending on the gap your work fills, with a list of every `[citation needed]`. |
+| **paper-critique** | "Review my draft." "What will reviewers say?" | Each claim against its evidence, missing baselines and ablations, statistical weak points, threats to validity, ranked with a concrete fix each, and the three changes that matter most. |
+| **decision-matrix** | "Help me decide between these offers." | Options against weighted criteria with a reason per score, what would flip the result, a recommendation and a reversible first step. The decision stays yours. |
+| **llm-council** | "Give me a second opinion." "Argue both sides." | Several independent answers, then a judge: agreements, disagreements, claims to verify, a final answer with a confidence. |
+
+## Where it runs
+
+| | Claude apps (web, desktop, mobile) | Claude Code and Cowork |
+|---|---|---|
+| The seven skills | yes | yes |
+| Looking references up | through web search, when it is on in your chat | through the bundled reference checker (below), no setup |
+| Saving notes as files | the note comes in the reply, ready to copy | saved in the folder you choose |
+
+Without web search and without the checker, citation-check still finds orphans, suspicious entries and unsupported claims, and marks every reference `unchecked` instead of guessing.
 
 ## The reference-lookup server
 
@@ -29,13 +48,9 @@ It asks two public, keyless services: [OpenAlex](https://openalex.org) (works by
 
 **Platforms.** Python 3.10 or newer on the PATH as `python3` (on Windows, install Python from python.org and tick "Add to PATH"; if only `python` exists, change the command in `.mcp.json`).
 
-## Why these four
-
-They are the steps a research student repeats every week: read a paper, keep what matters, decide something, and make sure the references in a draft are real and say what the draft says they say. The skills insist on the same things a good supervisor would: page references, "not found" instead of a guess, and the decision left to the person.
-
 ## Install
 
-From the Claude directory once the listing is live, or in Claude Code today:
+From the Claude directory: search for Research Desk. In Claude Code:
 
 ```
 /plugin marketplace add najikay/claude-research-skills
@@ -44,8 +59,12 @@ From the Claude directory once the listing is live, or in Claude Code today:
 
 ## Tests and evals
 
-- `python -m pytest -q` runs the server's offline tests (every HTTP call replaced by a fake); CI runs them on each push.
-- `evals/` holds one case per skill (a prompt with a small inlined draft, bibliography or paper excerpt, and an LLM grader). `claude plugin eval . --runs 1` runs them. On our runs every case scores 1.00 with the plugin, and the citation-check, decision-matrix and llm-council cases score 0.00 without it (the ablation column in the eval report); the evals exercise the skills, the server is covered by the unit tests.
+- `python -m pytest -q` runs the reference checker's offline tests (every HTTP call replaced by a fake) and a check that every skill's frontmatter is valid; CI runs them on Linux and Windows.
+- `evals/` holds one case per skill: a prompt with a small inlined draft, bibliography or paper excerpt, and a grader. `claude plugin eval .` runs each case with the plugin and without it.
+
+EVALS_TABLE
+
+Each case is built so that a plausible-sounding answer fails: a reference list with an invented entry and an orphan, three papers on two different benchmarks, a related-work request that tempts a citation from memory, a draft that claims significance from one run.
 
 ## Author
 
@@ -53,6 +72,4 @@ Naji Kayal, University of Haifa (robotics, SLAM, computer vision). Issues and su
 
 ## License
 
-Apache-2.0. See `LICENSE`.
-
-See `CHANGELOG.md` for versions.
+Apache-2.0. See `LICENSE`. See `CHANGELOG.md` for versions.

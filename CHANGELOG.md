@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0 — 2026-10-05
+- Three new skills: **paper-compare** (papers side by side, no ranking across different benchmarks), **related-work** (a section drafted only from your own sources, with `[citation needed]` where one is missing) and **paper-critique** (a referee's read of your draft: claims against evidence, ranked, with fixes).
+- Every skill is now complete in the Claude apps, where the bundled reference checker cannot run: citation-check verifies through web search when it is on and marks references `unchecked` otherwise, never `verified` from memory; notes and decisions come in the reply when there are no files to write.
+- Skill descriptions rewritten in the words people use ("are these references real?", "review my draft"), each saying when the skill does not apply.
+- llm-council says which kind of council it ran, and treats agreement between stances of one model as weaker than agreement between models.
+- A test that every skill's frontmatter is valid YAML (an unquoted colon in a description silently drops the whole frontmatter).
+
 ## 0.2.1 — 2026-10-03
 - Reference lookup: a DOI or arXiv id that resolves to another paper is reported as a mismatch (it was silently passed over).
 - Titles with accents, LaTeX accents (`{\"u}`) or non-Latin scripts are matched (they were never found).
