@@ -1,21 +1,33 @@
 ---
 name: citation-check
-description: Verify that each citation in a draft exists, matches the bibliography entry and supports the sentence it is attached to. Use before submitting or sharing a paper, report or thesis section, or when asked whether the references are real.
+description: "Check whether the references in a draft are real and whether each citation supports the sentence it is attached to. Every entry is looked up; invented, mismatched and orphaned references are flagged. Use when the user asks \"are these references real?\", \"check my citations\" or \"check my bibliography\", shares a reference list from AI-written text, or is about to submit a paper, thesis or report. Not for formatting a bibliography in a citation style."
 ---
 
 # Citation check
 
-Input: a draft (`.md`, `.tex`, `.docx` text) and its bibliography (`.bib` or a reference list). Ask for the bibliography if only the draft was given.
+Input: a draft and its bibliography (a `.bib`, a reference list, or references pasted in the conversation). Ask for the bibliography if only the draft was given. A reference list alone is fine: then skip the checks that need the draft.
 
 ## Checks, in order
 1. **Resolvable**: every `\cite{key}` / `[n]` / (Author, year) maps to exactly one bibliography entry; list orphans both ways (citations without an entry, entries never cited).
-2. **Real**: when the `reference-lookup` tools are available, call `verify_bibtex` on the whole bibliography (or `verify_reference` per entry) and report its verdict per entry: `verified` (title, first author and year agree), `partial` (title agrees, the year is off or the entry gave no authors: look at the match), `mismatch` (wrong first author or title, or a DOI / arXiv id that points to another paper), `not_found` or `unchecked` (the services could not be asked). A `not_found` entry with a specific title is the classic sign of an invented reference; say so plainly, but treat a generic title, a non-English title or an `unchecked` result as "could not confirm", not as invented. Without the tools, judge from the entry alone (venue fits the title, plausible year, a DOI prefix that looks real) and mark the result `unchecked`.
-3. **Support**: for each cited sentence, state what the source must contain for the citation to be fair. When the source text is available (a note, the PDF, a page you can fetch), mark `supported` / `partial` / `not found` with the page or section. When it is not available, mark `unverified`, never `supported`.
-4. **Style**: one consistent format, no duplicate entries, arXiv preprints that have a published version (`lookup_reference` on the arXiv id returns the DOI when arXiv records one).
+2. **Real**: look every entry up, by the best means you have (next section), and give each a verdict: `verified` (title, first author and year agree with a record you found), `partial` (title agrees; the year is off or the authors differ in part: show the record), `mismatch` (the DOI or arXiv id leads to another paper, or the first author or title is wrong), `not_found` (you searched and nothing matches) or `unchecked` (you could not look it up).
+3. **Support**: for each cited sentence, state what the source must contain for the citation to be fair. When the source text is available (a note, the PDF, a page you can open), mark `supported` / `partial` / `not found` with the page or section. When it is not available, mark `unverified`, never `supported`.
+4. **Style**: one consistent format, no duplicate entries, preprints that have a published version.
+
+## How to look an entry up, by what you have
+Use the first that applies, and say at the top of the report which one you used.
+
+1. **The `reference-lookup` tools** (Claude Code, Cowork): `verify_bibtex` on a whole `.bib`, `verify_reference` per entry, `lookup_reference` to clean an entry from its DOI or arXiv id, `search_works` when an entry is too vague, `citation_neighbours` for what a paper cites and who cites it. Report the tool's verdict per entry.
+2. **Web search or page fetch, no lookup tools** (most chat sessions): for each entry search the exact title in quotes with the first author's surname; when the entry has a DOI open `https://doi.org/<doi>`, when it has an arXiv id open `https://arxiv.org/abs/<id>`. Compare title, first author and year with what you find and give the same verdicts. With more than 25 entries, check first the ones that carry the draft's main claims, then as many as you can, and list the ones left `unchecked`.
+3. **Neither**: every entry is `unchecked`. Still report what you can see in the entry itself (a venue that does not fit the title, an impossible year, a malformed DOI), tell the user that opening `https://doi.org/<doi>` is the quickest check of their own, and say that with web search turned on you can do the lookups.
+
+Recognising a title is not a check. From memory alone the most you may say is "recognised, unchecked".
+
+A `not_found` entry with a specific title is the classic sign of an invented reference: say so plainly. Treat a generic title, a non-English title or an `unchecked` result as "could not confirm", not as invented.
 
 ## Output
-A table `key · where used · real · supported · style · note`, then a short list of what to fix first: invented or not-found references and orphans before style. Never invent a DOI, page number or quote; "not found" is an answer.
+Give the result in the reply; write a file only when the user is working in files and asks for one.
 
-## With the reference-lookup tools
-- `verify_bibtex` for a whole `.bib`; `verify_reference` for one entry; `lookup_reference` to clean up an entry from its DOI or arXiv id; `search_works` when a reference is too vague to check; `citation_neighbours` to see what a key paper cites and who cites it.
-- The tools send the reference's title, DOI or arXiv id (and, for `search_works`, the search words you compose) to OpenAlex and arXiv, two public keyless services. Do not put sentences from the draft into a search. Say which entries were checked that way.
+A table `key · where used · real · supported · style · note`, then a short list of what to fix first: invented or not-found references and orphans before style. Never invent a DOI, a page number or a quote; "not found" is an answer.
+
+## What leaves the conversation
+The lookup tools send an entry's title, DOI or arXiv id (and for `search_works` the search words you compose) to OpenAlex and arXiv, two public keyless services. Web search sends the same kind of query to the search provider. Do not put sentences from the user's draft into a search.
