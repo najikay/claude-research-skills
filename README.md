@@ -44,7 +44,7 @@ Without web search and without the checker, citation-check still finds orphans a
 
 It asks two public, keyless services: [OpenAlex](https://openalex.org) (works by DOI or title) and [arXiv](https://arxiv.org) (arXiv ids), one request at a time, with arXiv's one-call-per-three-seconds rule respected. There is no account, key or storage.
 
-**Data handling.** The server itself never sees your draft; Claude passes it a reference's title, DOI or arXiv id, or a few search words for `search_works`. Those go to `api.openalex.org` and `export.arxiv.org`, which see the request as any web request (your address, the plugin's user agent). Nothing is kept by the plugin. No personal data is read or stored. Author names in a bibliography are public bibliographic data and are sent only to match the paper.
+**Data handling** (the full statement is in [Privacy](PRIVACY.md))**.** The server itself never sees your draft; Claude passes it a reference's title, DOI or arXiv id, or a few search words for `search_works`. Those go to `api.openalex.org` and `export.arxiv.org`, which see the request as any web request (your address, the plugin's user agent). Nothing is kept by the plugin. No personal data is read or stored. Author names in a bibliography are public bibliographic data and are sent only to match the paper.
 
 In the Claude apps the checker does not run. There, citation-check looks references up through Claude's web search, which sends a reference's title, DOI or arXiv id as a search; related-work may search a topic phrase for a missing citation. Neither sends sentences from your draft or a description of your unpublished work.
 

@@ -21,5 +21,6 @@
   ],
   "license": "Apache-2.0",
   "displayName": "Research Desk",
-  "icon": ".claude-plugin/icon.png"
+  "icon": ".claude-plugin/icon.png",
+  "privacyPolicyUrl": "https://github.com/najikay/claude-research-skills/blob/main/PRIVACY.md"
 }
