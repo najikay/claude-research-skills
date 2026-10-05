@@ -64,7 +64,19 @@ From the Claude directory: search for Research Desk. In Claude Code:
 - `python -m pytest -q` runs the reference checker's offline tests (every HTTP call replaced by a fake) and a check that every skill's frontmatter is valid; CI runs them on Linux and Windows.
 - `evals/` holds one case per skill: a prompt with a small inlined draft, bibliography or paper excerpt, and a grader. `claude plugin eval .` runs each case with the plugin and without it.
 
-EVALS_TABLE
+Last run (Claude Code 2.1.288, three runs per case and arm, 2026-10-05):
+
+| Case | With the plugin | Without |
+|---|---|---|
+| citation-check | 1.00 | 0.33 |
+| research-litnote | 1.00 | 0.00 |
+| paper-compare | 1.00 | 0.33 |
+| related-work | 1.00 | 0.00 |
+| paper-critique | 1.00 | 0.00 |
+| decision-matrix | 1.00 | 0.00 |
+| llm-council | 1.00 | 1.00 |
+
+Claude runs a good council on request without the plugin; that skill's value is that it fires when a second opinion is called for and reports in a fixed shape. All seven cases run with no tools, so they test what the skills do in a plain chat; the web-search and reference-checker routes are covered by the checker's own tests, not by these cases.
 
 Each case is built so that a plausible-sounding answer fails: a reference list with an invented entry and an orphan, three papers on two different benchmarks, a related-work request that tempts a citation from memory, a draft that claims significance from one run.
 
