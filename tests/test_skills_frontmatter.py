@@ -22,7 +22,7 @@ def frontmatter(path: Path) -> dict[str, str]:
     block = text.split("---\n", 2)[1]
     out = {}
     for line in block.splitlines():
-        m = re.match(r"^([A-Za-z_-]+):\s?(.*)$", line)
+        m = re.match(r"^([A-Za-z_-]+): (.*)$", line)  # exactly one space: "key:value" is not a mapping
         assert m, f"{path}: frontmatter line is not 'key: value': {line!r}"
         out[m.group(1)] = m.group(2)
     return out
@@ -31,15 +31,15 @@ def frontmatter(path: Path) -> dict[str, str]:
 def value(raw: str, where: str) -> str:
     if raw.startswith('"'):
         return json.loads(raw)  # raises on a broken double-quoted scalar
-    assert ": " not in raw and " #" not in raw, f"{where}: quote this value, it contains ': ' or ' #'"
-    assert not raw.endswith(":") and raw[:1] not in "[]{}&*!|>'%@`,", f"{where}: quote this value"
+    assert ": " not in raw and " #" not in raw and "\t#" not in raw, f"{where}: quote this value, it contains ': ' or ' #'"
+    assert raw and not raw.endswith(":") and raw[:1] not in "[]{}&*!|>'%@`,#-?:", f"{where}: quote this value"
     return raw
 
 
 class SkillFrontmatter(unittest.TestCase):
     def test_every_skill_has_valid_frontmatter(self):
         files = sorted(SKILLS.glob("*/SKILL.md"))
-        self.assertGreaterEqual(len(files), 4)
+        self.assertGreaterEqual(len(files), 7)  # a deleted skill is caught
         for f in files:
             fm = frontmatter(f)
             self.assertEqual(set(fm), {"name", "description"}, f)

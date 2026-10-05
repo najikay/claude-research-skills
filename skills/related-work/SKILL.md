@@ -5,7 +5,7 @@ description: "Draft a related-work or literature-review section from sources the
 
 # Related work
 
-Input: (a) what the user's own work does, in a sentence or two; (b) the sources: literature notes, PDFs, abstracts, or a bibliography with enough text to know what each paper shows. Ask for (a) if it is missing: a related-work section argues toward a gap, and you need to know which one.
+Input: (a) what the user's own work does, in a sentence or two; (b) the sources: literature notes, PDFs, abstracts, or a bibliography with enough text to know what each paper shows. Ask for (a) if it is missing: a related-work section argues toward a gap, and you need to know which one. If no sources were supplied, say so and ask for them; you may offer an outline in which every claim is `[citation needed: …]`, and nothing more.
 
 ## The one rule
 **Cite only what the user supplied.** A sentence about prior work carries the key of a supplied source that actually says it. If a sentence needs a source you were not given, write `[citation needed: <what kind of paper>]` in its place. Never fill the gap from memory, however well known the paper.
@@ -17,7 +17,7 @@ Input: (a) what the user's own work does, in a sentence or two; (b) the sources:
 4. **Coverage report**, after the draft:
    - sources used, and for what;
    - sources not used, and why;
-   - every `[citation needed]` with a search phrase that would find a candidate;
+   - every `[citation needed]` with a search phrase that would find a candidate. The phrase describes the topic; it never names a paper, an author or a system;
    - claims in the draft that rest on an abstract only.
 
 ## Style
@@ -27,4 +27,6 @@ Input: (a) what the user's own work does, in a sentence or two; (b) the sources:
 - Length: about 150 words per theme unless the user says otherwise.
 
 ## With lookup tools or web search
-You may look for candidates to fill a `[citation needed]`, and list them **after** the draft under "candidates to check", with why each might fit. They enter the text only when the user accepts them.
+You may look for candidates to fill a `[citation needed]`, and list them **after** the draft under "candidates to check", with a link and why each might fit. They enter the text only when the user accepts them. When a supplied source is a bare bibliography entry, you may fetch its abstract and use it, marked `abstract only`.
+
+Search with the topic of the missing citation only. Never put sentences from the user's draft, or a description of their unpublished contribution, into a search.

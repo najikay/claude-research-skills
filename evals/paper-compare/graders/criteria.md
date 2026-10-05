@@ -8,6 +8,7 @@ A successful response gets ALL of these right:
 - It gives a side-by-side table with one column per paper and rows covering at least problem or idea, data or setup, headline result and limits or assumptions.
 - The numbers are copied exactly with where they stand: 0.082 m ATE RMSE on EuRoC MH_01 to MH_05 (Section 5, Table 2) and 120 Hz on a Jetson Nano for A; 1.12 % translational error on KITTI 00 to 10 (Section 4.2, Table 1) and 25 Hz on a desktop GPU for C. No number is invented for B.
 - It says A and C are NOT directly comparable, because they use different datasets and different metrics (ATE in metres on EuRoC against percent translational error on KITTI), and it does not rank them by accuracy.
-- It notes the points that matter for the user's choice: C assumes a stereo camera while the user's work and A are monocular or the camera type is flagged as a deciding question, and A fails under pure rotation.
+- It notes the points that matter for the user's choice: C assumes a stereo camera and A is monocular, so the user's own camera setup decides which is usable (it asks, or flags this; it does not assume the user's camera type), and A fails under pure rotation.
 - It ends with what each adds or which to cite or build on for what, and what is still unknown (B's actual results).
+It may recommend a baseline on stated grounds other than accuracy (camera type, hardware, the limits above).
 A response that declares one paper more accurate than another across the two datasets, or that fills in a result for B, fails.

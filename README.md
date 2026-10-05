@@ -25,10 +25,10 @@ The skills share one habit: **they say what they could not check.** A reference 
 | | Claude apps (web, desktop, mobile) | Claude Code and Cowork |
 |---|---|---|
 | The seven skills | yes | yes |
-| Looking references up | through web search, when it is on in your chat | through the bundled reference checker (below), no setup |
+| Looking references up | through web search, when it is on in your chat | through the bundled reference checker (below); needs Python 3.10+, see Platforms |
 | Saving notes as files | the note comes in the reply, ready to copy | saved in the folder you choose |
 
-Without web search and without the checker, citation-check still finds orphans, suspicious entries and unsupported claims, and marks every reference `unchecked` instead of guessing.
+Without web search and without the checker, citation-check still finds orphans and suspicious entries, flags claims it cannot check as `unverified`, and marks every reference `unchecked` instead of guessing.
 
 ## The reference-lookup server
 
@@ -45,6 +45,8 @@ Without web search and without the checker, citation-check still finds orphans, 
 It asks two public, keyless services: [OpenAlex](https://openalex.org) (works by DOI or title) and [arXiv](https://arxiv.org) (arXiv ids), one request at a time, with arXiv's one-call-per-three-seconds rule respected. There is no account, key or storage.
 
 **Data handling.** The server itself never sees your draft; Claude passes it a reference's title, DOI or arXiv id, or a few search words for `search_works`. Those go to `api.openalex.org` and `export.arxiv.org`, which see the request as any web request (your address, the plugin's user agent). Nothing is kept by the plugin. No personal data is read or stored. Author names in a bibliography are public bibliographic data and are sent only to match the paper.
+
+In the Claude apps the checker does not run. There, citation-check looks references up through Claude's web search, which sends a reference's title, DOI or arXiv id as a search; related-work may search a topic phrase for a missing citation. Neither sends sentences from your draft or a description of your unpublished work.
 
 **Platforms.** Python 3.10 or newer on the PATH as `python3` (on Windows, install Python from python.org and tick "Add to PATH"; if only `python` exists, change the command in `.mcp.json`).
 

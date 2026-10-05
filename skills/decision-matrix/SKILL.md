@@ -1,6 +1,6 @@
 ---
 name: decision-matrix
-description: "Decide between named options with a weighted matrix: criteria and weights, a score with a reason per cell, what would flip the result, a recommendation and a reversible first step. Use when the user says \"help me decide between\", \"which should I choose?\" or \"X or Y?\" about concrete alternatives with real stakes: a purchase, a job offer, a design, a plan. Not for quick preferences, and not for questions with one obvious answer."
+description: "Decide between named options with a weighted matrix: criteria and weights, a score with a reason per cell, what would flip the result, a recommendation and a reversible first step. Use when the user says \"help me decide between\", \"which should I choose?\" or \"X or Y?\" about concrete alternatives with real stakes: a purchase, a job offer, a design, a plan. Not for quick preferences, and not for a second opinion on one answer (use llm-council)."
 ---
 
 # Decision matrix
