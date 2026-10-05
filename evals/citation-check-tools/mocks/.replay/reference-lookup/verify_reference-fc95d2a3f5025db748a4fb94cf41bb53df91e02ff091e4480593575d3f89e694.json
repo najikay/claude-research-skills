@@ -1,0 +1,13 @@
+{
+  "input": {
+    "title": "ORB-SLAM3: An Accurate Open-Source Library for Visual, Visual-Inertial and Multi-Map SLAM",
+    "authors": [
+      "Campos, C."
+    ],
+    "year": 2021
+  },
+  "output": "{\"status\": \"verified\", \"match\": {\"title\": \"ORB-SLAM3: An Accurate Open-Source Library for Visual, Visual-Inertial and Multi-Map SLAM\", \"authors\": [\"Carlos Campos\"], \"year\": 2021, \"doi\": \"10.1109/TRO.2021.3075644\", \"url\": \"https://doi.org/10.1109/TRO.2021.3075644\"}, \"notes\": [], \"problems\": []}",
+  "verdict": "ok",
+  "recordedAt": "2026-10-05T17:27:52.954Z",
+  "model": "claude-sonnet-5-5"
+}

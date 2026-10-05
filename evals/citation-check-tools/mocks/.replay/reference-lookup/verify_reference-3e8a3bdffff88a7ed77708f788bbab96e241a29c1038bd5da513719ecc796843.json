@@ -1,0 +1,13 @@
+{
+  "input": {
+    "title": "An Unused Reference",
+    "authors": [
+      "Smith, A."
+    ],
+    "year": 2020
+  },
+  "output": "{\"status\": \"not_found\", \"notes\": [], \"problems\": [\"no work with a matching title\"]}",
+  "verdict": "ok",
+  "recordedAt": "2026-10-05T17:28:02.260Z",
+  "model": "claude-sonnet-5-5"
+}

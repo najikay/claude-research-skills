@@ -1,0 +1,14 @@
+{
+  "input": {
+    "title": "Fog Is No Obstacle: Perfect Radar Odometry",
+    "authors": [
+      "Doe, J."
+    ],
+    "year": 2023,
+    "doi": "10.9999/fake.1"
+  },
+  "output": "{\"status\": \"not_found\", \"by\": \"OpenAlex by DOI, then OpenAlex by title\", \"notes\": [], \"problems\": [\"DOI 10.9999/fake.1 does not resolve\", \"no work with a matching title\"]}",
+  "verdict": "ok",
+  "recordedAt": "2026-10-05T17:27:56.670Z",
+  "model": "claude-sonnet-5-5"
+}

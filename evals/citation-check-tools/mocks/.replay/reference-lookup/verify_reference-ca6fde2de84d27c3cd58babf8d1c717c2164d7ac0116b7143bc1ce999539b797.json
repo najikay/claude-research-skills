@@ -1,0 +1,14 @@
+{
+  "input": {
+    "title": "Attention Is All You Need",
+    "authors": [
+      "Vaswani, A.",
+      "Shazeer, N."
+    ],
+    "year": 2017
+  },
+  "output": "{\"status\": \"verified\", \"match\": {\"title\": \"Attention Is All You Need\", \"authors\": [\"Ashish Vaswani\"], \"year\": 2017, \"doi\": \"10.48550/arxiv.1706.03762\", \"url\": \"https://arxiv.org/abs/1706.03762\"}, \"notes\": [], \"problems\": []}",
+  "verdict": "ok",
+  "recordedAt": "2026-10-05T17:27:50.825Z",
+  "model": "claude-sonnet-5-5"
+}

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.1 — 2026-10-05
+- A privacy statement (`PRIVACY.md`), linked from the README and the manifest: what the plugin reads, the two public services the reference checker calls, and that nothing is collected.
+- A new eval case, `citation-check-tools`, runs citation-check with the reference checker's tools answered by a recorded stand-in, so the route that uses the tools is tested too (the other cases run with no tools). No skill or server code changed.
+
 ## 0.3.0 — 2026-10-05
 - Three new skills: **paper-compare** (papers side by side, no ranking across different benchmarks), **related-work** (a section drafted only from your own sources, with `[citation needed]` where one is missing) and **paper-critique** (a referee's read of your draft: claims against evidence, ranked, with fixes).
 - Every skill is now complete in the Claude apps, where the bundled reference checker cannot run: citation-check verifies through web search when it is on and marks references `unchecked` otherwise, never `verified` from memory; notes and decisions come in the reply when there are no files to write.

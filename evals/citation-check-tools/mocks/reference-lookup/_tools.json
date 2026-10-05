@@ -1,0 +1,116 @@
+{
+ "tools": [
+  {
+   "name": "verify_reference",
+   "description": "Check one reference against OpenAlex (by DOI, then title) and arXiv (by arXiv id). Returns status verified (title, first author and year agree) | partial (title agrees; the year is off or no authors were given) | mismatch (wrong first author or title, or a DOI/arXiv id that points elsewhere) | not_found | unchecked (the services could not be asked), with the matched record and the reasons. Give as much as you have; a generic title alone is weak evidence.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "title": {
+      "type": "string"
+     },
+     "authors": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "description": "author names, first author first"
+     },
+     "year": {
+      "type": [
+       "string",
+       "integer"
+      ]
+     },
+     "doi": {
+      "type": "string"
+     },
+     "arxiv": {
+      "type": "string",
+      "description": "arXiv id like 2504.20339"
+     }
+    },
+    "additionalProperties": false
+   }
+  },
+  {
+   "name": "verify_bibtex",
+   "description": "Check every entry of a BibTeX text (up to 60) and return a verdict per citekey plus counts.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "bibtex": {
+      "type": "string"
+     }
+    },
+    "additionalProperties": false,
+    "required": [
+     "bibtex"
+    ]
+   }
+  },
+  {
+   "name": "lookup_reference",
+   "description": "Clean metadata (title, authors, year, venue, DOI) for a DOI, arXiv id or OpenAlex id.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "ident": {
+      "type": "string"
+     }
+    },
+    "additionalProperties": false,
+    "required": [
+     "ident"
+    ]
+   }
+  },
+  {
+   "name": "search_works",
+   "description": "Find candidate papers by words in the title (OpenAlex). Use to resolve a vague reference before verifying it.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "query": {
+      "type": "string"
+     },
+     "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 25
+     }
+    },
+    "additionalProperties": false,
+    "required": [
+     "query"
+    ]
+   }
+  },
+  {
+   "name": "citation_neighbours",
+   "description": "What a paper cites (its first references) and the most-cited papers citing it, for a DOI or OpenAlex id.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "ident": {
+      "type": "string"
+     },
+     "refs": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 50
+     },
+     "cites": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 25
+     }
+    },
+    "additionalProperties": false,
+    "required": [
+     "ident"
+    ]
+   }
+  }
+ ]
+}

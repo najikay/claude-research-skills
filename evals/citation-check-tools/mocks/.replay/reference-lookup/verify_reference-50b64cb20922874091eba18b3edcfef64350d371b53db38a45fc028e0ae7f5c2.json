@@ -1,0 +1,16 @@
+{
+  "input": {
+    "title": "Deep Residual Learning for Image Recognition",
+    "authors": [
+      "He, K.",
+      "Zhang, X.",
+      "Ren, S.",
+      "Sun, J."
+    ],
+    "year": 2016
+  },
+  "output": "{\"status\": \"verified\", \"match\": {\"title\": \"Deep Residual Learning for Image Recognition\", \"authors\": [\"Kaiming He\"], \"year\": 2016, \"doi\": \"10.1109/CVPR.2016.90\", \"url\": \"https://doi.org/10.1109/CVPR.2016.90\"}, \"notes\": [], \"problems\": []}",
+  "verdict": "ok",
+  "recordedAt": "2026-10-05T17:28:00.452Z",
+  "model": "claude-sonnet-5-5"
+}
