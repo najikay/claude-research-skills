@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0 — 2026-10-06
+- **The checker everywhere.** The reference checker now also runs as a hosted service (`research-desk-checker.fly.dev`), declared in the plugin beside the local one, so citation-check verifies references in the Claude apps, where 81 % of installs are. Same code, stateless, nothing stored, a rate limit per client; `hosting/` has the Dockerfile and the Fly config to run your own copy.
+- A reference whose title OpenAlex cannot verify is searched again filtered to its year, then on arXiv by title: OpenAlex lists a 2025 reprint of *Attention Is All You Need* in place of the 2017 paper, which came back `partial`; it is now `verified` from arXiv.
+- Tools carry a title and read-only annotations, so Claude can call them without a prompt per call.
+- The eval case `citation-check-tools` was run once against the real hosted server (five lookups over the network): all five checks passed.
+
 ## 0.3.1 — 2026-10-05
 - A privacy statement (`PRIVACY.md`), linked from the README and the manifest: what the plugin reads, the two public services the reference checker calls, and that nothing is collected.
 - A new eval case, `citation-check-tools`, runs citation-check with the reference checker's tools answered by a recorded stand-in, so the route that uses the tools is tested too (the other cases run with no tools). No skill or server code changed.

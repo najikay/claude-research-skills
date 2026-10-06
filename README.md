@@ -32,7 +32,7 @@ Without web search and without the checker, citation-check still finds orphans a
 
 ## The hosted checker
 
-Since 0.4 the checker also runs as a small web service, so references are verified in the Claude apps too. It is the same code (`servers/reference_lookup/remote.py` wraps `server.py` in MCP's Streamable HTTP transport), stateless, with nothing stored and a rate limit per client; see `hosting/README.md` to run your own copy. What it receives and where it goes is in [PRIVACY.md](PRIVACY.md).
+Since 0.4 the checker also runs as a small web service, so references are verified in the Claude apps too. In Claude Code and Cowork both copies are available (`reference-lookup` on your machine, `reference-lookup-hosted` on the web); they have the same five tools, and the local one works offline. It is the same code (`servers/reference_lookup/remote.py` wraps `server.py` in MCP's Streamable HTTP transport), stateless, with nothing stored and a rate limit per client; see `hosting/README.md` to run your own copy. What it receives and where it goes is in [PRIVACY.md](PRIVACY.md).
 
 ## The reference-lookup server
 
@@ -67,7 +67,7 @@ From the Claude directory: search for Research Desk. In Claude Code:
 
 - `python -m pytest -q` runs the reference checker's offline tests (every HTTP call replaced by a fake) and a check that every skill's frontmatter is valid; CI runs them on Linux and Windows.
 - `evals/` holds one case per skill: a prompt with a small inlined draft, bibliography or paper excerpt, and a grader. `claude plugin eval .` runs each case with the plugin and without it.
-- `evals/citation-check-tools` is the one case that uses the reference checker's tools. A stand-in answers the tool calls from recordings (`mocks/`), so the run needs no network. It passed five checks in three of three runs with the plugin (judge: Sonnet, 2026-10-05): the tool was called, the verdicts match what the tools returned, citation and bibliography mismatches are reported, a real reference is not taken as proof of the sentence citing it, and the one quote available is used.
+- `evals/citation-check-tools` is the one case that uses the reference checker's tools. A stand-in answers the tool calls from recordings (`mocks/`), so the run needs no network. It passed five checks in three of three runs with the plugin (judge: Sonnet, 2026-10-05), and once more on 2026-10-06 against the real hosted checker instead of the recordings (`--mocks off`, five lookups over the network, all five checks passed): the tool was called, the verdicts match what the tools returned, citation and bibliography mismatches are reported, a real reference is not taken as proof of the sentence citing it, and the one quote available is used.
 
 Last run (Claude Code 2.1.288, three runs per case and arm, 2026-10-05):
 

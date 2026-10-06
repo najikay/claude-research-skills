@@ -12,7 +12,7 @@
       "name": "research-desk",
       "source": "./",
       "description": "Research work you can stand behind: check that references are real, take faithful notes on a paper, compare papers, draft related work from your own sources, review a draft like a referee, decide between options with a weighted matrix, and get a judged second opinion. Says plainly what it could not verify.",
-      "version": "0.3.1",
+      "version": "0.4.0",
       "author": {
         "name": "Naji Kayal"
       },
