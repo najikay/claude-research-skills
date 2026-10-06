@@ -32,8 +32,8 @@ PAUSE_S = 0.25  # polite spacing between OpenAlex calls
 ARXIV_PAUSE_S = 3.0  # arXiv asks for one request every three seconds
 REQUEST_TIMEOUT_S = 10
 BATCH_DEADLINE_S = 150  # verify_bibtex returns what it has by then
-_last_arxiv_call = 0.0
-_arxiv_lock = threading.Lock()  # the HTTP transport serves several clients at once; arXiv still gets one call per three seconds
+_last_arxiv_call = 0.0  # the next free arXiv slot, shared by every thread of the HTTP transport
+_arxiv_lock = threading.Lock()
 NS = {"a": "http://www.w3.org/2005/Atom"}
 PROTOCOL_VERSION = "2025-06-18"
 INFO = {"name": "reference-lookup", "version": "0.4.0"}
@@ -53,16 +53,11 @@ def fetch(url: str, params: dict[str, str] | None = None) -> tuple[int, str]:
     arXiv calls are spaced three seconds apart (its API terms); a 429 or 503 from either
     service is retried once after the Retry-After it names (default 5 s).
     """
-    global _last_arxiv_call
     if params:
         url = f"{url}?{urllib.parse.urlencode(params)}"
-    if url.startswith(ARXIV):
-        with _arxiv_lock:
-            wait = ARXIV_PAUSE_S - (time.monotonic() - _last_arxiv_call)
-            if wait > 0:
-                time.sleep(wait)
-            _last_arxiv_call = time.monotonic()
     for attempt in (1, 2):
+        if url.startswith(ARXIV):
+            _pace_arxiv()
         try:
             req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept": "application/json, text/xml"})
             with urllib.request.urlopen(req, timeout=REQUEST_TIMEOUT_S) as r:  # noqa: S310 - https to two known hosts
@@ -79,6 +74,23 @@ def fetch(url: str, params: dict[str, str] | None = None) -> tuple[int, str]:
         except (urllib.error.URLError, TimeoutError, OSError, ValueError) as e:
             return 0, str(e)[:160]
     return 0, "retry failed"
+
+
+def _pace_arxiv() -> None:
+    """One arXiv call per three seconds across every thread: each caller reserves the next free slot
+    under the lock and sleeps outside it, so concurrent callers queue without blocking each other."""
+    global _last_arxiv_call
+    with _arxiv_lock:
+        slot = max(time.monotonic(), _last_arxiv_call + ARXIV_PAUSE_S)
+        _last_arxiv_call = slot
+    wait = slot - time.monotonic()
+    if wait > 0:
+        time.sleep(wait)
+
+
+def arxiv_wait_s() -> float:
+    """How long a new arXiv call would wait now (for callers with a time budget)."""
+    return max(0.0, _last_arxiv_call + ARXIV_PAUSE_S - time.monotonic())
 
 
 def doi_path(doi: str) -> str:
@@ -222,7 +234,7 @@ def _rank(v: dict) -> tuple[int, int, float]:
 STATUS_ORDER = {"verified": 3, "partial": 2, "mismatch": 1}
 
 
-def verify_reference(ref: dict) -> dict:
+def verify_reference(ref: dict, budget_s: float | None = None) -> dict:
     """Look one reference up: by DOI, then arXiv id, then title; every candidate is judged."""
     steps: list[tuple[str, str, dict]] = []
     if ref.get("doi"):
@@ -236,11 +248,13 @@ def verify_reference(ref: dict) -> dict:
         if year:  # a reprint can push the original out of the top ten (OpenAlex lists a 2025 'Attention Is All You Need'); ask for the year too
             steps.append(("title+year", OPENALEX, {"search": str(ref["title"]), "filter": f"publication_year:{year}", "select": FIELDS, "per-page": "5"}))
         # last, arXiv by title: it keeps the original record of a preprint that OpenAlex has merged into a reprint
-        steps.append(("arxiv-title", ARXIV, {"search_query": 'ti:"' + re.sub(r'["\\]', " ", str(ref["title"])) + '"', "max_results": "5"}))
+        if budget_s is None or budget_s > ARXIV_PAUSE_S + arxiv_wait_s() + REQUEST_TIMEOUT_S:
+            steps.append(("arxiv-title", ARXIV, {"search_query": 'ti:"' + re.sub(r'["\\]', " ", str(ref["title"])) + '"', "max_results": "5"}))
     if not steps:
         return {"status": "unchecked", "problems": ["nothing to look up: give a title, a DOI or an arXiv id"]}
     best: dict | None = None
     failures: list[str] = []
+    searched = False  # a title search answered (with or without candidates): absence is then evidence
     identifier_problem: str | None = None  # a DOI or arXiv id that resolves to some other paper
     identifier_note: str | None = None  # a DOI or arXiv id the service does not know
     for i, (how, url, params) in enumerate(steps):
@@ -263,6 +277,7 @@ def verify_reference(ref: dict) -> dict:
                 failures.append("OpenAlex: unreadable answer")
                 continue
             cands = data.get("results") or ([data] if data.get("title") else [])
+            searched = searched or how.startswith("title")
         if how in ("doi", "arxiv") and cands and ref.get("title") and all(judge(ref, c, how) is None for c in cands):
             other = str(cands[0].get("title") or "?")
             identifier_problem = f"the {'DOI' if how == 'doi' else 'arXiv id'} given points to another paper: \u201c{other}\u201d"
@@ -273,9 +288,10 @@ def verify_reference(ref: dict) -> dict:
         if best is not None and best["status"] == "verified":
             break
     if best is None:
-        if failures:
+        if failures and not searched:
             return {"status": "unchecked", "problems": failures + ([identifier_problem] if identifier_problem else [])}
-        return {"status": "not_found", "by": ", then ".join(h for h, _, _ in steps), "problems": ([identifier_problem] if identifier_problem else []) + ["no work with a similar title was found"]}
+        # OpenAlex answered the title search and had nothing: that is a finding, even if a later step failed
+        return {"status": "not_found", "by": ", then ".join(h for h, _, _ in steps), "problems": ([identifier_problem] if identifier_problem else []) + ["no work with a similar title was found"], "notes": [f"could not also ask {f}" for f in failures]}
     if identifier_problem:  # the paper exists, but the identifier in the reference is wrong: never 'verified'
         best = {**best, "status": "mismatch", "problems": [identifier_problem, *best["problems"]]}
     elif identifier_note and best["status"] == "verified":
@@ -428,7 +444,7 @@ def verify_bibtex(text: str, limit: int = 60) -> dict:
         if i:
             time.sleep(PAUSE_S)
         try:
-            v = verify_reference(ref)
+            v = verify_reference(ref, budget_s=BATCH_DEADLINE_S - (time.monotonic() - t0))
         except Exception as e:  # noqa: BLE001 - one odd entry is reported, the others go on
             v = {"status": "unchecked", "problems": [f"could not check: {type(e).__name__}: {str(e)[:120]}"]}
         if ref.get("duplicate_of"):

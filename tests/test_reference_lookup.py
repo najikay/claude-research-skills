@@ -249,3 +249,49 @@ def test_arxiv_by_title_is_the_last_resort(fake):
     assert v["status"] == "verified" and v["by"] == "arxiv-title" and v["matched_year"] == 2020
     assert [c[0] for c in fake] == [rl.OPENALEX, rl.OPENALEX, rl.ARXIV]  # title, title+year, then arXiv
     assert fake[-1][1]["search_query"].startswith('ti:"ORB-SLAM3')
+
+
+def test_an_empty_title_search_is_not_found_even_if_arxiv_fails(monkeypatch):
+    """OpenAlex answered and had nothing; a later arXiv timeout is a note, not a reason to say unchecked."""
+
+    def fetch(url, params=None):
+        if url == rl.ARXIV:
+            return 0, "timed out"
+        return 200, json.dumps({"results": []})
+
+    monkeypatch.setattr(rl, "fetch", fetch)
+    monkeypatch.setattr(rl.time, "sleep", lambda s: None)
+    v = rl.verify_reference({"title": "Fog Is No Obstacle: Perfect Radar Odometry", "year": 2023})
+    assert v["status"] == "not_found" and v["notes"] == ["could not also ask arXiv: timed out"]
+    monkeypatch.setattr(rl, "fetch", lambda url, params=None: (0, "down"))  # nothing answered at all
+    assert rl.verify_reference({"title": "Fog Is No Obstacle"})["status"] == "unchecked"
+
+
+def test_a_tight_budget_skips_the_arxiv_title_search(monkeypatch):
+    seen = []
+
+    def fetch(url, params=None):
+        seen.append(url)
+        return 200, json.dumps({"results": []})
+
+    monkeypatch.setattr(rl, "fetch", fetch)
+    monkeypatch.setattr(rl.time, "sleep", lambda s: None)
+    rl.verify_reference({"title": "Nothing Here", "year": 2020}, budget_s=5)
+    assert seen == [rl.OPENALEX, rl.OPENALEX]
+    rl.verify_reference({"title": "Nothing Here", "year": 2020})
+    assert seen[-1] == rl.ARXIV
+
+
+def test_arxiv_pacing_spreads_concurrent_callers(monkeypatch):
+    import threading
+
+    slept = []
+    monkeypatch.setattr(rl.time, "monotonic", lambda: 100.0)
+    monkeypatch.setattr(rl.time, "sleep", lambda s: slept.append(round(s, 2)))
+    rl._last_arxiv_call = 0.0
+    threads = [threading.Thread(target=rl._pace_arxiv) for _ in range(3)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    assert sorted(slept) == [3.0, 6.0]  # the first goes now; the next two each wait for their own slot

@@ -17,8 +17,8 @@ docker build -f hosting/Dockerfile -t research-desk-checker . && docker run -p 8
 ## Fly.io (the hosted copy)
 
 ```
-fly launch --no-deploy --copy-config --name research-desk-checker   # once, from the repo root
-fly deploy
+fly apps create research-desk-checker   # once
+fly deploy -c hosting/fly.toml          # from the repo root
 curl https://research-desk-checker.fly.dev/health
 ```
 
