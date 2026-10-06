@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.4.1 — 2026-10-06
+- The hosted checker has two hard ceilings for the whole service: 120 messages a minute in all and 3,000 tool calls a day; past them it refuses with a plain message (citation-check then falls back to web search). The health endpoint shows the day's count.
+
 ## 0.4.0 — 2026-10-06
 - **The checker everywhere.** The reference checker now also runs as a hosted service (`research-desk-checker.fly.dev`), declared in the plugin beside the local one, so citation-check verifies references in the Claude apps, where 81 % of installs are. Same code, stateless, nothing stored, a rate limit per client; `hosting/` has the Dockerfile and the Fly config to run your own copy.
 - A reference whose title OpenAlex cannot verify is searched again filtered to its year, then on arXiv by title: OpenAlex lists a 2025 reprint of *Attention Is All You Need* in place of the 2017 paper, which came back `partial`; it is now `verified` from arXiv.

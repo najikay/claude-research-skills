@@ -36,7 +36,7 @@ _last_arxiv_call = 0.0  # the next free arXiv slot, shared by every thread of th
 _arxiv_lock = threading.Lock()
 NS = {"a": "http://www.w3.org/2005/Atom"}
 PROTOCOL_VERSION = "2025-06-18"
-INFO = {"name": "reference-lookup", "version": "0.4.0"}
+INFO = {"name": "reference-lookup", "version": "0.4.1"}
 INSTRUCTIONS = (
     "Check references against OpenAlex and arXiv. verify_reference takes one reference "
     "(title, authors, year, doi, arxiv) and returns verified / mismatch / not_found / unchecked "

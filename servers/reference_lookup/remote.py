@@ -33,6 +33,12 @@ BURST = 20
 MAX_BATCH = 10  # JSON-RPC messages per POST; each costs a token
 MAX_BUCKETS = 10_000  # client addresses remembered by the rate limiter
 TIMEOUT_S = 30  # a client that stops sending mid-request is dropped after this
+# Hard ceilings for the whole service, whoever is calling: the host bill is a fixed machine price plus
+# traffic, and OpenAlex and arXiv are shared public services. Past the ceiling the server answers
+# with a plain refusal and does no work. Both are overridable through the environment.
+GLOBAL_PER_MINUTE = int(os.environ.get("CHECKER_GLOBAL_PER_MINUTE", "120"))
+GLOBAL_BURST = int(os.environ.get("CHECKER_GLOBAL_BURST", "60"))
+DAILY_TOOL_CALLS = int(os.environ.get("CHECKER_DAILY_TOOL_CALLS", "3000"))
 KNOWN_METHODS = {"initialize", "ping", "tools/list", "tools/call", "notifications/initialized", "notifications/cancelled"}
 JSON = "application/json"
 log = logging.getLogger("reference-lookup-http")
@@ -68,6 +74,30 @@ class RateLimit:
             self._buckets = dict(sorted(self._buckets.items(), key=lambda kv: kv[1][1])[-MAX_BUCKETS // 2 :])
 
 
+class DailyCap:
+    """At most ``limit`` tool calls per UTC day, counted in memory (a restart starts a fresh day)."""
+
+    def __init__(self, limit: int) -> None:
+        self.limit = limit
+        self._day = ""
+        self._count = 0
+        self._lock = threading.Lock()
+
+    def take(self, n: int, day: str | None = None) -> bool:
+        day = day or time.strftime("%Y-%m-%d", time.gmtime())
+        with self._lock:
+            if day != self._day:
+                self._day, self._count = day, 0
+            if self._count + n > self.limit:
+                return False
+            self._count += n
+            return True
+
+    def used(self) -> int:
+        with self._lock:
+            return self._count
+
+
 def rpc_error(rid: Any, code: int, message: str) -> dict:
     return {"jsonrpc": "2.0", "id": rid, "error": {"code": code, "message": message}}
 
@@ -93,6 +123,8 @@ class Handler(BaseHTTPRequestHandler):
     server_version = f"reference-lookup/{checker.INFO['version']}"
     protocol_version = "HTTP/1.1"
     limiter = RateLimit()
+    everyone = RateLimit(per_minute=GLOBAL_PER_MINUTE, burst=GLOBAL_BURST)
+    daily = DailyCap(DAILY_TOOL_CALLS)
 
     def log_message(
         self, fmt: str, *args: Any
@@ -145,7 +177,7 @@ class Handler(BaseHTTPRequestHandler):
         if self.headers.get("Content-Length") or self.headers.get("Transfer-Encoding"):
             self.close_connection = True  # a body on a GET is never read: it must not become the next request
         if self.path in ("/health", "/healthz"):
-            self.send_json(200, {"ok": True, "name": checker.INFO["name"], "version": checker.INFO["version"]})
+            self.send_json(200, {"ok": True, "name": checker.INFO["name"], "version": checker.INFO["version"], "tool_calls_today": self.daily.used(), "daily_limit": DAILY_TOOL_CALLS})
         elif self.path in ("/", "/mcp"):
             self.send_json(405 if self.path == "/mcp" else 200, {
                 "name": "Research Desk reference checker",
@@ -181,10 +213,14 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json(400, rpc_error(None, -32600, f"at most {MAX_BATCH} messages per request"))
             return
         if not self.limiter.allow(self.client_key(), cost=count):
-            self.send_response(429)
-            self.send_header("Retry-After", "10")
-            self.send_json_tail(rpc_error(None, -32000, "too many requests from this address; wait ten seconds and try again"))
-            log.info("429")
+            self.refuse(429, "10", "too many requests from this address; wait ten seconds and try again")
+            return
+        if not self.everyone.allow("all", cost=count):
+            self.refuse(429, "30", "the checker is busy; wait half a minute and try again")
+            return
+        calls = _tool_calls(body)
+        if calls and not self.daily.take(calls):
+            self.refuse(429, "3600", "the checker's daily limit is reached; references can still be checked by web search, or try again tomorrow")
             return
         status, payload = answer(body)
         if payload is None:
@@ -192,6 +228,12 @@ class Handler(BaseHTTPRequestHandler):
         else:
             self.send_json(status, payload)
         log.info("%s %s %.2fs", status, _describe(body), time.monotonic() - started)  # no address, no arguments
+
+    def refuse(self, status: int, retry_after: str, message: str) -> None:
+        self.send_response(status)
+        self.send_header("Retry-After", retry_after)
+        self.send_json_tail(rpc_error(None, -32000, message))
+        log.info("%s %s", status, message.split(";")[0])
 
     def send_json_tail(self, payload: Any) -> None:
         """Headers already started with send_response: finish them and write the body."""
@@ -208,6 +250,11 @@ def _parse(body: bytes) -> list[Any] | None:
     except (ValueError, UnicodeDecodeError):
         return None
     return msg if isinstance(msg, list) else [msg]
+
+
+def _tool_calls(body: bytes) -> int:
+    msgs = _parse(body) or []
+    return sum(1 for m in msgs if isinstance(m, dict) and m.get("method") == "tools/call")
 
 
 def _count(body: bytes) -> int:

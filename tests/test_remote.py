@@ -248,3 +248,25 @@ def test_log_line_carries_only_known_names():
     assert remote._describe(body) == "tools/call:verify_reference"
     forged = json.dumps([{"jsonrpc": "2.0", "id": 1, "method": "A Secret Draft Title\n200 fake"}, {"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "Another Secret"}}]).encode()
     assert remote._describe(forged) == "other,tools/call:other"
+
+
+def test_global_and_daily_ceilings(served):
+    remote.Handler.limiter = remote.RateLimit()
+    remote.Handler.everyone = remote.RateLimit(per_minute=60, burst=2)
+    codes = [post(served, {"jsonrpc": "2.0", "id": i, "method": "ping"}, headers={"X-Forwarded-For": f"10.0.0.{i}"})[0] for i in range(3)]
+    assert codes == [200, 200, 429]  # three different callers share one ceiling
+    remote.Handler.everyone = remote.RateLimit()
+    remote.Handler.daily = remote.DailyCap(1)
+    call = {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "search_works", "arguments": {"query": "x"}}}
+    assert post(served, call)[0] == 200
+    status, headers, out = post(served, call)
+    assert status == 429 and headers["Retry-After"] == "3600" and "daily limit" in out["error"]["message"]
+    assert post(served, {"jsonrpc": "2.0", "id": 2, "method": "tools/list"})[0] == 200  # listing costs nothing
+    with urllib.request.urlopen(served + "/health", timeout=5) as r:
+        assert json.loads(r.read())["tool_calls_today"] == 1
+
+
+def test_daily_cap_resets_with_the_day():
+    cap = remote.DailyCap(2)
+    assert cap.take(2, day="2026-10-06") and not cap.take(1, day="2026-10-06")
+    assert cap.take(1, day="2026-10-07")

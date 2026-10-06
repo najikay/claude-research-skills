@@ -14,7 +14,7 @@ Input: a draft and its bibliography (a `.bib`, a reference list, or references p
 4. **Style**: one consistent format, no duplicate entries, preprints that have a published version.
 
 ## How to look an entry up, by what you have
-Start with the first that applies, and say at the top of the report which you used. If a route leaves entries `unchecked`, try the next route for those entries.
+Start with the first that applies, and say at the top of the report which you used. If a route leaves entries `unchecked`, try the next route for those entries. If the hosted checker answers that its daily limit is reached or that it is busy, say so in one line and use the next route.
 
 1. **The `reference-lookup` tools** (the bundled checker in Claude Code and Cowork, or the hosted checker in the Claude apps; the tools are the same): `verify_bibtex` on a whole `.bib`, `verify_reference` per entry, `lookup_reference` to clean an entry from its DOI or arXiv id, `search_works` when an entry is too vague, `citation_neighbours` for what a paper cites and who cites it. Report the tool's verdict per entry. `verify_bibtex` stops after 60 entries or at its time limit: list any entry it did not reach as `unchecked`, or send the rest in a second call.
 2. **Web search or page fetch, no lookup tools** (most chat sessions): for each entry search the exact title in quotes with the first author's surname; when the entry has a DOI open `https://doi.org/<doi>`, when it has an arXiv id open `https://arxiv.org/abs/<id>`. Compare title, first author and year with what you find and give the same verdicts. With more than 25 entries, check first the ones that carry the draft's main claims, then as many as you can, and list the ones left `unchecked`.
