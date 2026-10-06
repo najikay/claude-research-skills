@@ -7,7 +7,8 @@ state between requests; GET /mcp answers 405. Standard library only, like the ch
     python3 servers/reference_lookup/remote.py --port 8080
 
 What it keeps: nothing. The log has one line per request with the method, the tool name, the
-status and the time taken; never the reference text. A per-address rate limit protects the two
+status and the time taken; never the reference text and never the caller's address (that is held
+in memory only, for the rate limit). A per-address rate limit protects the two
 public services behind it (OpenAlex, arXiv) from one busy client.
 """
 
@@ -143,12 +144,15 @@ class Handler(BaseHTTPRequestHandler):
         except ValueError:
             length = -1
         if length < 0 or length > MAX_BODY:
-            self.send_json(
-                413,
-                rpc_error(
-                    None, -32600, f"the body must be at most {MAX_BODY // 1024} KB"
-                ),
-            )
+            # read what the client is still sending (bounded) so the answer does not break its pipe
+            left = min(max(length, 0), 8 * MAX_BODY)
+            while left > 0:
+                chunk = self.rfile.read(min(left, 65536))
+                if not chunk:
+                    break
+                left -= len(chunk)
+            self.close_connection = True
+            self.send_json(413, rpc_error(None, -32600, f"the body must be at most {MAX_BODY // 1024} KB"))
             return
         body = self.rfile.read(length) if length else b""
         key = self.client_key()
@@ -162,7 +166,7 @@ class Handler(BaseHTTPRequestHandler):
                     "too many requests from this address; wait ten seconds and try again",
                 )
             )
-            log.info("429 %s", key)
+            log.info("429")
             return
         status, payload = answer(body)
         if payload is None:
@@ -170,7 +174,7 @@ class Handler(BaseHTTPRequestHandler):
         else:
             self.send_json(status, payload)
         what = _describe(body)
-        log.info("%s %s %s %.2fs", status, key, what, time.monotonic() - started)
+        log.info("%s %s %.2fs", status, what, time.monotonic() - started)  # no address, no arguments
 
     def send_json_tail(self, payload: Any) -> None:
         """Headers already started with send_response: finish them and write the body."""

@@ -2,7 +2,13 @@
   "mcpServers": {
     "reference-lookup": {
       "command": "python3",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/servers/reference_lookup/server.py"]
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/servers/reference_lookup/server.py"
+      ]
+    },
+    "reference-lookup-hosted": {
+      "type": "http",
+      "url": "https://research-desk-checker.fly.dev/mcp"
     }
   }
 }

@@ -1,9 +1,6 @@
-# Fly.io: one small always-on machine. `fly launch --copy-config --dockerfile hosting/Dockerfile` from the repo root.
+# Fly.io: one small always-on machine. `fly deploy -c hosting/fly.toml --dockerfile hosting/Dockerfile` from the repo root.
 app = "research-desk-checker"
 primary_region = "fra"
-
-[build]
-  dockerfile = "hosting/Dockerfile"
 
 [http_service]
   internal_port = 8080
