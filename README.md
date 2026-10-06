@@ -25,10 +25,14 @@ The skills share one habit: **they say what they could not check.** A reference 
 | | Claude apps (web, desktop, mobile) | Claude Code and Cowork |
 |---|---|---|
 | The seven skills | yes | yes |
-| Looking references up | through web search, when it is on in your chat | through the bundled reference checker (below); needs Python 3.10+, see Platforms |
+| Looking references up | through the hosted reference checker (the same checker, served from `research-desk-checker.fly.dev`); web search as the fallback | through the bundled reference checker (below); needs Python 3.10+, see Platforms |
 | Saving notes as files | the note comes in the reply, ready to copy | saved in the folder you choose |
 
 Without web search and without the checker, citation-check still finds orphans and suspicious entries, flags claims it cannot check as `unverified`, and marks every reference `unchecked` instead of guessing.
+
+## The hosted checker
+
+Since 0.4 the checker also runs as a small web service, so references are verified in the Claude apps too. It is the same code (`servers/reference_lookup/remote.py` wraps `server.py` in MCP's Streamable HTTP transport), stateless, with nothing stored and a rate limit per client; see `hosting/README.md` to run your own copy. What it receives and where it goes is in [PRIVACY.md](PRIVACY.md).
 
 ## The reference-lookup server
 

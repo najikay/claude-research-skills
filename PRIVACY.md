@@ -1,6 +1,6 @@
 # Privacy
 
-Research Desk is a set of instructions (skills) for Claude, plus a small reference checker that runs on your own machine. This page says what that means for your data.
+Research Desk is a set of instructions (skills) for Claude, plus a small reference checker that runs on your own machine in Claude Code and Cowork, and as a hosted service for the Claude apps. This page says what that means for your data.
 
 ## What Research Desk collects
 
@@ -14,7 +14,8 @@ When you use a skill, Claude reads what you put into the conversation: your draf
 
 - **Your conversation** is handled by Anthropic under the terms and privacy policy of the Claude product you are using. Research Desk does not change that.
 - **The reference checker** (Claude Code and Cowork only) sends a reference's title, DOI or arXiv id, or a few search words, to two public, keyless services: OpenAlex (`api.openalex.org`) and arXiv (`export.arxiv.org`). They see your IP address and the query, as with any request. The checker never receives your draft; it stores nothing and writes no files.
-- **In the Claude apps**, where the checker does not run, the citation skill looks references up through Claude's web search: the same kind of query (a title, a DOI, an arXiv id) goes to the search provider. The related-work skill may search a topic phrase for a missing citation.
+- **The hosted checker** (the Claude apps) is the same program, run by the author on a rented server (Fly.io, Frankfurt region). Claude sends it a reference's title, DOI or arXiv id, or a few search words; it asks OpenAlex and arXiv and returns the verdict. It keeps no copy of what it was asked: its log holds the name of the tool called, the status and the time taken, with the client address kept only in memory for a rate limit. It never receives your draft and has no account, cookie or identifier for you.
+- **When neither checker is reachable**, the citation skill looks references up through Claude's web search: the same kind of query (a title, a DOI, an arXiv id) goes to the search provider. The related-work skill may search a topic phrase for a missing citation.
 - The skills instruct Claude never to put sentences from your draft, or a description of your unpublished work, into a search.
 
 ## What you can do
