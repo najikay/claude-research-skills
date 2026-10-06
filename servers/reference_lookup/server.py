@@ -15,6 +15,7 @@ import difflib
 import json
 import re
 import sys
+import threading
 import time
 import unicodedata
 import urllib.error
@@ -32,9 +33,10 @@ ARXIV_PAUSE_S = 3.0  # arXiv asks for one request every three seconds
 REQUEST_TIMEOUT_S = 10
 BATCH_DEADLINE_S = 150  # verify_bibtex returns what it has by then
 _last_arxiv_call = 0.0
+_arxiv_lock = threading.Lock()  # the HTTP transport serves several clients at once; arXiv still gets one call per three seconds
 NS = {"a": "http://www.w3.org/2005/Atom"}
 PROTOCOL_VERSION = "2025-06-18"
-INFO = {"name": "reference-lookup", "version": "0.2.1"}
+INFO = {"name": "reference-lookup", "version": "0.4.0"}
 INSTRUCTIONS = (
     "Check references against OpenAlex and arXiv. verify_reference takes one reference "
     "(title, authors, year, doi, arxiv) and returns verified / mismatch / not_found / unchecked "
@@ -55,10 +57,11 @@ def fetch(url: str, params: dict[str, str] | None = None) -> tuple[int, str]:
     if params:
         url = f"{url}?{urllib.parse.urlencode(params)}"
     if url.startswith(ARXIV):
-        wait = ARXIV_PAUSE_S - (time.monotonic() - _last_arxiv_call)
-        if wait > 0:
-            time.sleep(wait)
-        _last_arxiv_call = time.monotonic()
+        with _arxiv_lock:
+            wait = ARXIV_PAUSE_S - (time.monotonic() - _last_arxiv_call)
+            if wait > 0:
+                time.sleep(wait)
+            _last_arxiv_call = time.monotonic()
     for attempt in (1, 2):
         try:
             req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept": "application/json, text/xml"})
@@ -229,6 +232,11 @@ def verify_reference(ref: dict) -> dict:
         steps.append(("arxiv", ARXIV, {"id_list": aid, "max_results": "1"}))
     if ref.get("title"):
         steps.append(("title", OPENALEX, {"search": str(ref["title"]), "select": FIELDS, "per-page": "10"}))
+        year = year_of(ref.get("year"))
+        if year:  # a reprint can push the original out of the top ten (OpenAlex lists a 2025 'Attention Is All You Need'); ask for the year too
+            steps.append(("title+year", OPENALEX, {"search": str(ref["title"]), "filter": f"publication_year:{year}", "select": FIELDS, "per-page": "5"}))
+        # last, arXiv by title: it keeps the original record of a preprint that OpenAlex has merged into a reprint
+        steps.append(("arxiv-title", ARXIV, {"search_query": 'ti:"' + re.sub(r'["\\]', " ", str(ref["title"])) + '"', "max_results": "5"}))
     if not steps:
         return {"status": "unchecked", "problems": ["nothing to look up: give a title, a DOI or an arXiv id"]}
     best: dict | None = None
@@ -244,9 +252,9 @@ def verify_reference(ref: dict) -> dict:
                 identifier_note = f"the {'DOI' if how == 'doi' else 'arXiv id'} given is unknown to {'OpenAlex' if how == 'doi' else 'arXiv'}; matched by title instead"
             continue  # try the next way
         if status == 0 or status >= 400:
-            failures.append(f"{'arXiv' if how == 'arxiv' else 'OpenAlex'}: {'HTTP ' + str(status) if status else body}")
+            failures.append(f"{'arXiv' if how.startswith('arxiv') else 'OpenAlex'}: {'HTTP ' + str(status) if status else body}")
             continue
-        if how == "arxiv":
+        if how in ("arxiv", "arxiv-title"):
             cands = parse_arxiv(body)
         else:
             try:
@@ -507,16 +515,18 @@ def citation_neighbours(ident: str, refs: int = 10, cites: int = 8) -> dict:
 
 
 # -- MCP over stdio ---------------------------------------------------------------------------------
-def _tool(name: str, desc: str, props: dict, required: list[str] | None = None) -> dict:
+def _tool(name: str, title: str, desc: str, props: dict, required: list[str] | None = None) -> dict:
     schema: dict = {"type": "object", "properties": props, "additionalProperties": False}
     if required:
         schema["required"] = required
-    return {"name": name, "description": desc, "inputSchema": schema}
+    # Every tool only reads from two public services: the annotation lets Claude run it without a per-call prompt.
+    return {"name": name, "title": title, "description": desc, "inputSchema": schema, "annotations": {"title": title, "readOnlyHint": True, "destructiveHint": False, "openWorldHint": True}}
 
 
 TOOLS = [
     _tool(
         "verify_reference",
+        "Verify a reference",
         "Check one reference against OpenAlex (by DOI, then title) and arXiv (by arXiv id). Returns status verified (title, first author and year agree) | partial (title agrees; the year is off or no authors were given) | mismatch (wrong first author or title, or a DOI/arXiv id that points elsewhere) | not_found | unchecked (the services could not be asked), with the matched record and the reasons. Give as much as you have; a generic title alone is weak evidence.",
         {
             "title": {"type": "string"},
@@ -526,10 +536,10 @@ TOOLS = [
             "arxiv": {"type": "string", "description": "arXiv id like 2504.20339"},
         },
     ),
-    _tool("verify_bibtex", "Check every entry of a BibTeX text (up to 60) and return a verdict per citekey plus counts.", {"bibtex": {"type": "string"}}, ["bibtex"]),
-    _tool("lookup_reference", "Clean metadata (title, authors, year, venue, DOI) for a DOI, arXiv id or OpenAlex id.", {"ident": {"type": "string"}}, ["ident"]),
-    _tool("search_works", "Find candidate papers by words in the title (OpenAlex). Use to resolve a vague reference before verifying it.", {"query": {"type": "string"}, "limit": {"type": "integer", "minimum": 1, "maximum": 25}}, ["query"]),
-    _tool("citation_neighbours", "What a paper cites (its first references) and the most-cited papers citing it, for a DOI or OpenAlex id.", {"ident": {"type": "string"}, "refs": {"type": "integer", "minimum": 0, "maximum": 50}, "cites": {"type": "integer", "minimum": 0, "maximum": 25}}, ["ident"]),
+    _tool("verify_bibtex", "Verify a BibTeX file", "Check every entry of a BibTeX text (up to 60) and return a verdict per citekey plus counts.", {"bibtex": {"type": "string"}}, ["bibtex"]),
+    _tool("lookup_reference", "Look up a paper", "Clean metadata (title, authors, year, venue, DOI) for a DOI, arXiv id or OpenAlex id.", {"ident": {"type": "string"}}, ["ident"]),
+    _tool("search_works", "Search papers by title words", "Find candidate papers by words in the title (OpenAlex). Use to resolve a vague reference before verifying it.", {"query": {"type": "string"}, "limit": {"type": "integer", "minimum": 1, "maximum": 25}}, ["query"]),
+    _tool("citation_neighbours", "Citation neighbours", "What a paper cites (its first references) and the most-cited papers citing it, for a DOI or OpenAlex id.", {"ident": {"type": "string"}, "refs": {"type": "integer", "minimum": 0, "maximum": 50}, "cites": {"type": "integer", "minimum": 0, "maximum": 25}}, ["ident"]),
 ]
 
 

@@ -55,7 +55,8 @@ def fake(monkeypatch):
         if url.endswith("/W3"):
             return 200, json.dumps(works["W3"])
         if url == rl.ARXIV:
-            return (200, ATOM) if params.get("id_list") == "2007.11898" else (200, "<feed xmlns='http://www.w3.org/2005/Atom'></feed>")
+            hit = params.get("id_list") == "2007.11898" or "ORB-SLAM3" in params.get("search_query", "")
+            return (200, ATOM) if hit else (200, "<feed xmlns='http://www.w3.org/2005/Atom'></feed>")
         f = params.get("filter", "")
         if f.startswith("openalex:"):
             return 200, json.dumps({"results": [works[i] for i in f.split(":", 1)[1].split("|") if i in works]})
@@ -217,3 +218,34 @@ def test_arxiv_doi_and_zero_arguments(fake):
     calls = fake
     rl.call("citation_neighbours", {"ident": "10.1109/CVPR.2016.90", "refs": 0, "cites": 0})
     assert not any("cites:" in (p.get("filter") or "") for _, p in calls)  # cites=0 means no cited-by call
+
+
+def test_year_filter_finds_an_original_pushed_out_by_a_reprint(monkeypatch):
+    """OpenAlex's top ten for 'Attention Is All You Need' is led by a 2025 reprint; a search
+    filtered to the reference's year still finds the 2017 paper."""
+    reprint = work("W1", "Attention Is All You Need", 2025, ["Ashish Vaswani"], "10.65215/2q58a426", 26678)
+    original = work("W2", "Attention Is All You Need", 2017, ["Ashish Vaswani", "Noam Shazeer"], None, 100)
+    seen = []
+
+    def fetch(url, params=None):
+        seen.append(params.get("filter"))
+        if params.get("filter") == "publication_year:2017":
+            return 200, json.dumps({"results": [original]})
+        return 200, json.dumps({"results": [reprint]})
+
+    monkeypatch.setattr(rl, "fetch", fetch)
+    monkeypatch.setattr(rl.time, "sleep", lambda s: None)
+    v = rl.verify_reference({"title": "Attention Is All You Need", "authors": ["Ashish Vaswani"], "year": 2017})
+    assert v["status"] == "verified" and v["matched_year"] == 2017 and v["by"] == "title+year"
+    assert seen == [None, "publication_year:2017"]
+    # with no year given there is no second search, and the reprint is a partial match
+    v = rl.verify_reference({"title": "Attention Is All You Need", "authors": ["Ashish Vaswani"]})
+    assert v["status"] in ("partial", "verified") and len(seen) == 3
+
+
+def test_arxiv_by_title_is_the_last_resort(fake):
+    """A paper OpenAlex does not list under its title is still found on arXiv by title."""
+    v = rl.verify_reference({"title": "ORB-SLAM3: An Accurate Open-Source Library for Visual, Visual-Inertial and Multi-Map SLAM", "authors": ["Carlos Campos"], "year": 2020})
+    assert v["status"] == "verified" and v["by"] == "arxiv-title" and v["matched_year"] == 2020
+    assert [c[0] for c in fake] == [rl.OPENALEX, rl.OPENALEX, rl.ARXIV]  # title, title+year, then arXiv
+    assert fake[-1][1]["search_query"].startswith('ti:"ORB-SLAM3')
