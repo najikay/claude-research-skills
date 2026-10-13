@@ -3,10 +3,6 @@ type: llm
 weight: 1
 ---
 
-A successful response:
-- Frames the decision in one sentence including the deadline, and lists the three options (replacement pack, new laptop, do nothing) as real alternatives.
-- Proposes 3–6 weighted criteria that reflect what the user said (cost, time to a working machine, risk, effort), states the weights it used and offers to rescore if the user changes them, naming any dealbreaker separately.
-- Gives a scored option × criterion table with a short reason per cell and a weighted total.
-- Includes a sensitivity note (which weight or score would flip the result).
-- Gives a recommendation, a reversible first step (e.g. order the pack / confirm the part number / back up first) and what would change the recommendation.
-- Does not present the recommendation as the user's decision already made.
+This grader checks one thing: the criteria. The judge sees only the answer. For reference: the user's laptop battery is dying (it shuts down when unplugged). The options the user named: a replacement battery pack (about $50, fitted by the user), a new laptop ($900), or keeping it plugged in and doing nothing. The user is a student, money is tight, needs the machine daily for the next 5 months, is comfortable with a screwdriver, and the deadline is this week.
+
+PASS only if the answer uses three to six criteria, each with a stated weight, drawn from what the user said (for example cost, reliability, time to a working machine, effort or risk).
