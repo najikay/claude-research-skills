@@ -67,25 +67,26 @@ From the Claude directory: search for Research Desk. In Claude Code:
 
 ## Tests and evals
 
-- `python -m pytest -q` runs the reference checker's offline tests (every HTTP call replaced by a fake) and a check that every skill's frontmatter is valid; CI runs them on Linux and Windows.
-- `evals/` holds one case per skill: a prompt with a small inlined draft, bibliography or paper excerpt, and a grader. `claude plugin eval .` runs each case with the plugin and without it.
-- `evals/citation-check-tools` is the one case that uses the reference checker's tools. A stand-in answers the tool calls from recordings (`mocks/`), so the run needs no network. It passed five checks in three of three runs with the plugin (judge: Sonnet, 2026-10-05), and once more on 2026-10-06 against the real hosted checker instead of the recordings (`--mocks off`, five lookups over the network, all five checks passed): the tool was called, the verdicts match what the tools returned, citation and bibliography mismatches are reported, a real reference is not taken as proof of the sentence citing it, and the one quote available is used.
+- `python -m pytest -q` runs the reference checker's offline tests (every HTTP call replaced by a fake), a check that every skill's frontmatter is valid, and a check that every skill ends its reply on a `Next:` line; CI runs them on Linux and Windows.
+- `evals/` holds one case per skill: a prompt with a small inlined draft, bibliography or paper excerpt, and graders that each check one thing and restate the facts they check (the judge sees only the answer). One grader per case checks that the reply ends on a `Next:` line. `claude plugin eval .` runs each case with the plugin and without it.
+- `evals/citation-check-tools` is the one case that uses the reference checker's tools; a stand-in answers the tool calls from recordings (`mocks/`), so the run needs no network. On 2026-10-06 it also passed once against the real hosted checker.
 
-Last run (Claude Code 2.1.288, three runs per case and arm, 2026-10-05):
+The graders were rewritten on 2026-10-13 (each case's single long checklist split into one check per grader), so the numbers below are re-based and replace the earlier 1.00 figures, which do not reproduce under the new graders or the current Claude Code. Last run: Claude Code 2.1.291, judge Sonnet, three runs per case and version, 2026-10-13. "All checks" is the number of runs that passed every grader of the case; "share" is the mean share of graders passed.
 
-| Case | With the plugin | Without |
-|---|---|---|
-| citation-check | 1.00 | 0.33 |
-| research-litnote | 1.00 | 0.00 |
-| paper-compare | 1.00 | 0.33 |
-| related-work | 1.00 | 0.00 |
-| paper-critique | 1.00 | 0.00 |
-| decision-matrix | 1.00 | 0.00 |
-| llm-council | 1.00 | 1.00 |
+| Case (graders) | 0.4.2 all checks | 0.4.2 share | 0.4.1 all checks | 0.4.1 share | No plugin share |
+|---|---|---|---|---|---|
+| citation-check (10) | 3/3 | 1.00 | 0/3 | 0.87 | 0.47 |
+| citation-check-tools (6) | 2/3 | 0.90 | 0/3 | 0.86 | 0.38 |
+| decision-matrix (11) | 2/3 | 0.97 | 0/3 | 0.76 | 0.27 |
+| llm-council (11) | 3/3 | 1.00 | 0/3 | 0.91 | 0.52 |
+| paper-compare (13) | 1/3 | 0.95 | 0/3 | 0.87 | 0.56 |
+| paper-critique (14) | 0/3 | 0.88 | 0/3 | 0.79 | 0.52 |
+| related-work (10) | 0/3 | 0.80 | 0/3 | 0.67 | 0.30 |
+| research-litnote (7) | 1/3 | 0.90 | 0/3 | 0.71 | 0.38 |
 
-Claude runs a good council on request without the plugin; that skill's value is that it fires when a second opinion is called for and reports in a fixed shape. All seven cases run with no tools, so they test what the skills do in a plain chat; the web-search and reference-checker routes are covered by the checker's own tests, not by these cases.
+0.4.1 has no `Next:` line, so it fails that grader in every run; leaving that grader out, 0.4.1 passes all checks in 2/3 (citation-check), 3/3 (citation-check-tools), 0/3, 3/3, 2/3, 0/3, 0/3 and 0/3 runs, and 0.4.2 in 3/3, 2/3, 2/3, 3/3, 1/3, 0/3, 0/3 and 1/3. Of the misses we read, several are strict readings of right answers (a critique that first says what it was given fails "opens with how the paper reads"; a correct comparison table failed once); the related-work check that every sentence about prior work carries a source fails for both versions in every run. The no-plugin column passes all checks in no run.
 
-Each case is built so that a plausible-sounding answer fails: a reference list with an invented entry and an orphan, three papers on two different benchmarks, a related-work request that tempts a citation from memory, a draft that claims significance from one run.
+Each case is built so that a plausible-sounding answer fails: a reference list with an invented entry and an orphan, papers on two different benchmarks plus one given by title only, a related-work request that tempts a citation from memory, a draft that claims significance from one run.
 
 ## Author
 

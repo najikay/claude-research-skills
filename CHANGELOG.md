@@ -11,7 +11,8 @@
   - llm-council: the claims still to verify as a checklist.
 - decision-matrix is described for methods, tools, datasets, designs and plans, no longer job offers (Career Desk compares offers).
 - The README says what to type first.
-- Each eval case has one more grader (the reply ends on a `Next:` line), and a test checks that every skill asks for one.
+- paper-compare says nothing from memory about a paper it has no text for, in the recommendation either; related-work's search phrases are never a known paper's title; citation-check's corrected entries never put a mismatched paper in place of the user's.
+- **Evals re-based.** Each case's long checklist grader is split into single-check graders that restate the facts they check, plus one that the reply ends on a `Next:` line; a test checks that every skill asks for one. 0.4.1 and 0.4.2 were run side by side on the new graders (README); the earlier 1.00 figures are withdrawn.
 
 ## 0.4.1 — 2026-10-06
 - The hosted checker has two hard ceilings for the whole service: 120 messages a minute in all and 3,000 tool calls a day; past them it refuses with a plain message (citation-check then falls back to web search). The health endpoint shows the day's count.
