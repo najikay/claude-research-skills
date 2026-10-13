@@ -17,7 +17,7 @@ Input: (a) what the user's own work does, in a sentence or two; (b) the sources:
 4. **Coverage report**, after the draft block (step 5):
    - sources used, and for what;
    - sources not used, and why;
-   - every `[citation needed]` as a checklist line, `- [ ] <what kind of paper> — search: <phrase>`. The phrase describes the topic; it never names a paper, an author or a system;
+   - every `[citation needed]` as a checklist line, `- [ ] <what kind of paper> — search: <phrase>`. The phrase describes the topic; it never names a paper, an author or a system, and is not a known paper's title;
    - claims in the draft that rest on an abstract only.
 5. **Give the draft as one fenced block** in the citation form of the sources (LaTeX when the user gave BibTeX keys), ready to paste into the paper. The reply runs: inventory, the draft block, the coverage report (with "candidates to check" when you searched), then the Next line.
 6. End with one line, the last of the reply: **Next:** "when you have added sources for the open boxes, paste the section with its bibliography and say *check my citations* (citation-check)."

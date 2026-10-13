@@ -8,5 +8,5 @@ A successful response:
 - Proposes 3–6 weighted criteria that reflect what the user said (cost, time to a working machine, risk, effort), states the weights it used and offers to rescore if the user changes them, naming any dealbreaker separately.
 - Gives a scored option × criterion table with a short reason per cell and a weighted total.
 - Includes a sensitivity note (which weight or score would flip the result).
-- Ends with a recommendation, a reversible first step (e.g. order the pack / confirm the part number / back up first) and what would change the recommendation.
+- Gives a recommendation, a reversible first step (e.g. order the pack / confirm the part number / back up first) and what would change the recommendation.
 - Does not present the recommendation as the user's decision already made.
