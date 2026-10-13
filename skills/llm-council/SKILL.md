@@ -14,6 +14,7 @@ A council is `N` independent answers plus one judge. Independence matters more t
    - **Sub-agents or other models you can reach**: give each the same prompt in a fresh context, without showing it the others.
 3. Judge: take the answers *anonymised* (A, B, C) and report: agreements, disagreements with the strongest argument on each side, factual claims to verify, and a final answer with a confidence of 0–1.
 4. Report. In one conversation: the seats' answers in full, then the judge's synthesis, then a short table `seat · position · confidence`. With sub-agents or other models: the synthesis first, then the table, with the seats' answers on request. Name which points still need a human.
+5. End with the claims still to verify as a checklist (`- [ ] <claim> — how to check it`), the points that need a human as one line each, and one line: **Next:** "check the first box; if the question is really a choice between named options, say *help me decide between …* (decision-matrix)."
 
 ## Rules
 - Say which kind of council this was. Three stances of one model share that model's blind spots: the report says so, and treats their agreement as weaker than agreement between different models.

@@ -19,6 +19,8 @@ Input: (a) what the user's own work does, in a sentence or two; (b) the sources:
    - sources not used, and why;
    - every `[citation needed]` with a search phrase that would find a candidate. The phrase describes the topic; it never names a paper, an author or a system;
    - claims in the draft that rest on an abstract only.
+5. **Give the draft as one fenced block** in the citation form of the sources (LaTeX when the user gave BibTeX keys), ready to paste into the paper. Give the `[citation needed]` list as a checklist (`- [ ] <what kind of paper> — search: <phrase>`).
+6. End with one line: **Next:** "when you have added sources for the open boxes, paste the section with its bibliography and say *check my citations* (citation-check)."
 
 ## Style
 - The citation form follows the sources: `\cite{key}` when the user gave BibTeX keys, (Author, year) or [n] otherwise.

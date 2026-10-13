@@ -25,4 +25,6 @@ Input: two to five papers, as PDFs, links, the user's notes, or pasted text. Wit
 - Do not bring in papers the user did not supply. You may list, separately and marked as suggestions, what else they might compare against: found with lookup tools or web search and given with a link, or else marked "from memory, check it exists".
 
 ## Where the result goes
-In the reply: the table, then the reading. Write a file only when the user works in files and asks for it.
+In the reply: the table, then the reading. Then the *Which to cite for what* part again as a block the user can paste into a draft, one line per claim: `claim → citekey (where it stands)`. Write a file only when the user works in files and asks for it.
+
+End with one line: **Next:** for any column marked `abstract only` or `basis: none`, "attach the PDF and say *make notes on this* (research-litnote)"; otherwise "say *draft my related work from these* (related-work), and the table becomes its sources".

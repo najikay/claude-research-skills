@@ -49,6 +49,12 @@ class SkillFrontmatter(unittest.TestCase):
             self.assertIn("Use when", desc, f"{f}: say when the skill applies")
             self.assertIn("Not for", desc, f"{f}: say when it does not")
 
+    def test_every_skill_ends_on_a_next_step(self):
+        # First use should leave one next step: each skill tells Claude to end the reply on a "Next:" line.
+        for f in sorted(SKILLS.glob("*/SKILL.md")):
+            body = f.read_text(encoding="utf-8").split("---\n", 2)[2]
+            self.assertIn("**Next:**", body, f"{f}: no Next: line for the end of the reply")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -6,18 +6,20 @@
 
 **Research work you can stand behind.** Seven skills for the things a student or researcher does every week: check that references are real, take faithful notes on a paper, compare papers, draft related work from your own sources, get your draft reviewed before a referee does, decide between options, and get a second opinion. Plus a small reference checker that looks papers up in OpenAlex and arXiv.
 
+**Try it first:** paste your reference list and type *Are these references real?* Or attach a PDF and type *Make notes on this paper.*
+
 The skills share one habit: **they say what they could not check.** A reference is `verified` only when it was looked up; a claim is `supported` only when the source text was read; a missing citation becomes `[citation needed]`, never an invented one.
 
 ## The skills
 
 | Skill | Say something like | What you get |
 |---|---|---|
-| **citation-check** | "Are these references real?" "Check my citations before I submit." | A table per citation: does it resolve, is the reference real (`verified`, `partial`, `mismatch`, `not_found`, `unchecked`), does the source support the sentence, style. Orphans both ways. What to fix first. |
+| **citation-check** | "Are these references real?" "Check my citations before I submit." | A table per citation: does it resolve, is the reference real (`verified`, `partial`, `mismatch`, `not_found`, `unchecked`), does the source support the sentence, style. Orphans both ways. A fix list to tick, and corrected entries rebuilt from the records it found. |
 | **research-litnote** | "Summarise this paper." "Make notes on this PDF." | A structured note: one-line takeaway, problem, method, evidence with page references, limits, quotes. Marked with what it was based on (full text or abstract only). |
 | **paper-compare** | "Compare these three papers." "Which should be my baseline?" | A side-by-side table with the numbers copied from each paper and where they stand, what each adds, which to cite for what, and a plain "not directly comparable" when benchmarks differ. |
 | **related-work** | "Draft my related work from these notes." | A themed section where every sentence carries one of *your* sources, ending on the gap your work fills, with a list of every `[citation needed]`. |
 | **paper-critique** | "Review my draft." "What will reviewers say?" | Each claim against its evidence, missing baselines and ablations, statistical weak points, threats to validity, ranked with a concrete fix each, and the three changes that matter most. |
-| **decision-matrix** | "Help me decide between these offers." | Options against weighted criteria with a reason per score, what would flip the result, a recommendation and a reversible first step. The decision stays yours. |
+| **decision-matrix** | "Help me decide between these two methods." | Options against weighted criteria with a reason per score, what would flip the result, a recommendation and a reversible first step, as a decision record you keep. The decision stays yours. |
 | **llm-council** | "Give me a second opinion." "Argue both sides." | Several independent answers, then a judge: agreements, disagreements, claims to verify, a final answer with a confidence. |
 
 ## Where it runs

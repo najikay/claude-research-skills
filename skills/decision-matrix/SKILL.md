@@ -1,6 +1,6 @@
 ---
 name: decision-matrix
-description: "Decide between named options with a weighted matrix: criteria and weights, a score with a reason per cell, what would flip the result, a recommendation and a reversible first step. Use when the user says \"help me decide between\", \"which should I choose?\" or \"X or Y?\" about concrete alternatives with real stakes: a purchase, a job offer, a design, a plan. Not for quick preferences, and not for a second opinion on one answer (use llm-council)."
+description: "Decide between named options with a weighted matrix: criteria and weights, a score with a reason per cell, what would flip the result, a recommendation and a reversible first step. Use when the user says \"help me decide between\", \"which should I choose?\" or \"X or Y?\" about concrete alternatives with real stakes: a method, a tool, a dataset, a design, a plan. Not for quick preferences, and not for a second opinion on one answer (use llm-council)."
 ---
 
 # Decision matrix
@@ -16,4 +16,6 @@ description: "Decide between named options with a weighted matrix: criteria and 
 Do not decide for the user: the recommendation is yours, the decision is theirs.
 
 ## Where the result goes
-Give the frame, the table, the sensitivity and the recommendation in the reply. Only when the user is working in files and wants it kept, also write it as a note (frontmatter `type: decision`, `status: proposed`, `options`, `chosen` left empty until the user decides).
+Give the frame, the table, the sensitivity and the recommendation in the reply. Then a **decision record** in one block the user can keep: the decision in one line, the options, the weights, the totals, the recommendation, the reversible first step, `chosen:` left empty, and `revisit:` with a date only if the user gave one (otherwise `[when you will know more]`). When the user works in files and wants it kept, write that record as a note (frontmatter `type: decision`, `status: proposed`).
+
+End with one line: **Next:** the reversible first step, as the thing to do today, then "when something changes, paste the record and say *rescore this*."

@@ -18,7 +18,9 @@ Input: the user's draft, whole or in part. Say at the start what you were given 
 4. **Minor issues**: clarity, undefined terms, figures that do not show what the text says, structure.
 5. **Questions a reviewer will ask**, the five most likely.
 6. **What is strong**, specifically: say which result or idea carries the paper, so the author protects it.
-7. **If you change three things**: the three changes that most improve the paper's chances, in order.
+7. **If you change three things**: the three changes that most improve the paper's chances, in order, as a checklist (`- [ ] <change> — <the line or section it concerns>`), so the author can tick them off.
+
+End with one line: **Next:** "revise one of the three, paste the new version of that section and say *review this section again*; I check it against the same finding. Before you submit, say *check my citations* (citation-check)."
 
 ## Rules
 - Tie every finding to the line it concerns, quoted or pointed to. For something that is missing (an ablation, a baseline, a variance), point to the claim or section that needs it. A criticism tied to neither is cut.
