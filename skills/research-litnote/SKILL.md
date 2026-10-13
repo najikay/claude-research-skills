@@ -17,7 +17,7 @@ One note per paper, named by citekey (`firstauthorYYYYkeyword`, lowercase).
 2. Fill the template below. Every claim under *Evidence* carries a reference to where it stands: the page when the text you had shows page numbers, otherwise the section name, or `page not known`. Never estimate a page. Numbers are copied, not rounded.
 3. Link: mention related notes the user already has when you can see them.
 4. Leave the note marked `status: draft`. The user reviews it; do not mark it reviewed yourself.
-5. End the reply with two lines. **Keep:** the file name the note was saved under, or, in a chat, "save this block as `<citekey>.md` in your notes folder". **Next:** with one note, "share the next paper and say *make notes on this*"; when the user already has notes on two or more papers in this conversation or folder, "say *compare these papers* (paper-compare)"; when they mentioned writing a paper, "with three or more notes, say *draft my related work from these notes* (related-work)".
+5. After the note, outside the fenced block and never inside the note file, end the reply with two lines, `Next:` the last, with one branch only. **Keep:** the file name the note was saved under, or, in a chat, "save this block as `<citekey>.md` in your notes folder". **Next:** with one note, "share the next paper and say *make notes on this*"; when the user already has notes on two or more papers in this conversation or folder, "say *compare these papers* (paper-compare)"; when they mentioned writing a paper, "with three or more notes, say *draft my related work from these notes* (related-work)".
 
 ## Template
 ```

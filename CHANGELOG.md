@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.4.2 — 2026-10-13
+- **First use lands.** Every skill now ends its reply on one `Next:` line with the words to type next, and leaves something to keep:
+  - citation-check: the fix list is a checklist to tick, in order (invented, orphans, mismatches, unverified support, style), plus a block of corrected entries rebuilt only from records it actually looked up; next, re-check after fixing.
+  - research-litnote: a `Keep:` line (the file name, or the name to save the block under) and a `Next:` toward the next paper, paper-compare or related-work.
+  - paper-compare: the "which to cite for what" lines again as a block to paste.
+  - related-work: the draft as one block ready to paste; the `[citation needed]` list as a checklist with search phrases.
+  - paper-critique: the three changes that matter most as a checklist; next, revise one and ask for that section to be reviewed again.
+  - decision-matrix: a decision record to keep (`chosen:` empty, `revisit:` dated only if you gave a date); next, the reversible first step, and "rescore this" when something changes.
+  - llm-council: the claims still to verify as a checklist.
+- decision-matrix is described for methods, tools, datasets, designs and plans, no longer job offers (Career Desk compares offers).
+- The README says what to type first.
+- Each eval case has one more grader (the reply ends on a `Next:` line), and a test checks that every skill asks for one.
+
 ## 0.4.1 — 2026-10-06
 - The hosted checker has two hard ceilings for the whole service: 120 messages a minute in all and 3,000 tool calls a day; past them it refuses with a plain message (citation-check then falls back to web search). The health endpoint shows the day's count.
 

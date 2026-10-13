@@ -27,4 +27,4 @@ Input: two to five papers, as PDFs, links, the user's notes, or pasted text. Wit
 ## Where the result goes
 In the reply: the table, then the reading. Then the *Which to cite for what* part again as a block the user can paste into a draft, one line per claim: `claim → citekey (where it stands)`. Write a file only when the user works in files and asks for it.
 
-End with one line: **Next:** for any column marked `abstract only` or `basis: none`, "attach the PDF and say *make notes on this* (research-litnote)"; otherwise "say *draft my related work from these* (related-work), and the table becomes its sources".
+End with one line, the last of the reply: **Next:** for any column marked `abstract only` or `basis: none`, "attach the PDF and say *make notes on this* (research-litnote)"; otherwise "say *draft my related work from these* (related-work), and the table becomes its sources".

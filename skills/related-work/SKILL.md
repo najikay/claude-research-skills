@@ -14,13 +14,13 @@ Input: (a) what the user's own work does, in a sentence or two; (b) the sources:
 1. **Inventory**: list the sources with one line each on what it shows and the basis (full text, abstract, note). A source too thin to cite safely (a title alone) is listed as "need more to use".
 2. **Themes**: group the sources into two to four lines of work that lead toward the user's contribution. A source can serve two themes; a theme with one source is fine if it matters.
 3. **Draft**, one paragraph per theme: what this line of work set out to do, what the key sources showed (each with its key), and the limitation that matters for the user's work. Then a closing paragraph that states the gap and how the user's work addresses it.
-4. **Coverage report**, after the draft:
+4. **Coverage report**, after the draft block (step 5):
    - sources used, and for what;
    - sources not used, and why;
-   - every `[citation needed]` with a search phrase that would find a candidate. The phrase describes the topic; it never names a paper, an author or a system;
+   - every `[citation needed]` as a checklist line, `- [ ] <what kind of paper> — search: <phrase>`. The phrase describes the topic; it never names a paper, an author or a system;
    - claims in the draft that rest on an abstract only.
-5. **Give the draft as one fenced block** in the citation form of the sources (LaTeX when the user gave BibTeX keys), ready to paste into the paper. Give the `[citation needed]` list as a checklist (`- [ ] <what kind of paper> — search: <phrase>`).
-6. End with one line: **Next:** "when you have added sources for the open boxes, paste the section with its bibliography and say *check my citations* (citation-check)."
+5. **Give the draft as one fenced block** in the citation form of the sources (LaTeX when the user gave BibTeX keys), ready to paste into the paper. The reply runs: inventory, the draft block, the coverage report (with "candidates to check" when you searched), then the Next line.
+6. End with one line, the last of the reply: **Next:** "when you have added sources for the open boxes, paste the section with its bibliography and say *check my citations* (citation-check)."
 
 ## Style
 - The citation form follows the sources: `\cite{key}` when the user gave BibTeX keys, (Author, year) or [n] otherwise.
